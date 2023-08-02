@@ -1,0 +1,23 @@
+{
+  "name": "henry3dviewer",
+  "version": "1.0.0",
+  "description": "Henry Personal Online 3D Viewer",
+  "main": "app.js",
+  "scripts": {
+    "build": "rollup -c ./rollup.config.mjs",
+    "watch": "rollup -w -c ./rollup.config.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "HENRY LEE",
+  "license": "ISC",
+  "dependencies": {
+    "dat.gui": "^0.7.9",
+    "firebase": "^10.1.0",
+    "three": "^0.135.0",
+    "web-ifc-three": "^0.0.121"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.1.0",
+    "rollup": "^3.26.3"
+  }
+}
