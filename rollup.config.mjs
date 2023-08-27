@@ -8,5 +8,12 @@ export default {
       file: "public/src/bundle.js",
     },
   ],
+  input: "public/src/firebaseApp.js",
+  output: [
+    {
+      format: "esm",
+      file: "public/src/firebaseBundle.js",
+    },
+  ],
   plugins: [resolve()],
 };
