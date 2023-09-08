@@ -299,12 +299,13 @@ function loadModelWithFileName(fileName){
 
     //Listen for 'progress' event
     xhr.onprogress = event => {
-
       // event.loaded returns how many bytes are downloaded
       // event.total returns the total number of bytes
       // event.total is only available if server sends `Content-Length` header
       // console.log(`Downloaded ${event.loaded} of ${event.total} bytes`)
-      console.log(`Downloaded ${Math.round(event.loaded/event.total) * 100}% bytes`)
+
+      
+      console.log(`Downloaded ${Math.round(event.loaded/event.total) * 100}%`)
     }
 
     xhr.onload = (event) => {
