@@ -13,11 +13,14 @@
   "dependencies": {
     "dat.gui": "^0.7.9",
     "firebase": "^10.1.0",
-    "three": "^0.135.0",
-    "web-ifc-three": "^0.0.121"
+    "three": "^0.149.0",
+    "web-ifc": "^0.0.43",
+    "web-ifc-three": "^0.0.125"
   },
   "devDependencies": {
+    "@rollup/plugin-multi-entry": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.1.0",
-    "rollup": "^3.26.3"
+    "dotenv": "^16.3.1",
+    "rollup": "^3.29.0"
   }
 }

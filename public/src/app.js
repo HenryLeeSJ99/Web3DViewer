@@ -1,14 +1,175 @@
 import { AmbientLight, AxesHelper, DirectionalLight, GridHelper, PerspectiveCamera, Scene, WebGLRenderer } from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { IFCLoader } from "web-ifc-three/IFCLoader";
 import { Raycaster, Vector2, MeshLambertMaterial } from "three";
-import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree} from "three-mesh-bvh";
+// import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree} from "three-mesh-bvh";
 import { IFCWALLSTANDARDCASE, IFCSLAB, IFCDOOR, IFCWINDOW, IFCFURNISHINGELEMENT, IFCMEMBER, IFCPLATE } from "web-ifc";
 import * as dat from 'dat.gui';
+import { initializeApp } from "firebase/app";
+import { getStorage, ref, listAll, getDownloadURL, getMetadata } from "firebase/storage";
 
 
+//#region UI Controller
+function addLoadingScreen(){
+  document.getElementById("loading").classList.remove("loader--hidden");
+}
+
+function removeLoadingScreen(){
+  document.getElementById("loading").classList.add("loader--hidden");
+}
+
+//Get models drop down
+const modelsDropDown = document.getElementById("modelsDropDown");
+
+// updateModelsDropDown
+function updateModelsDropDown(fileName){
+  let option = document.createElement("option");
+  option.setAttribute('value', fileName);
+
+  let optionText = document.createTextNode(fileName);
+  option.appendChild(optionText);
+
+  modelsDropDown.appendChild(option);
+}
+
+//#endregion
+
+//#region URLParams
+//Setting Up
+const queryString = window.location.search;
+console.log("Querystring =" + queryString);
+const urlParams = new URLSearchParams(queryString);
+
+//
+function setModel(fileName){
+  //Set Url Params
+  urlParams.set('model',fileName);
+
+  //Update Url
+  history.replaceState(null, null, "?" + urlParams.toString());
+}
+
+function getUrlModelParam(){
+  return urlParams.get('model');
+}
+
+//#endregion
+
+//#region Firebase
+//Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCYH1tD_8O-mOHrP_kFiKl_jAAbsHlJ3E8",
+  authDomain: "henry3dviewer.firebaseapp.com",
+  projectId: "henry3dviewer",
+  storageBucket: "henry3dviewer.appspot.com",
+  messagingSenderId: "476216862286",
+  appId: "1:476216862286:web:f899f27e6d08ca1c8dc51f",
+  measurementId: "G-8H1GZX6RN4"
+};
+
+//Initialise firebase
+initializeApp(firebaseConfig);
+
+//Ref to firebase storage bucket
+const storage = getStorage();
+
+//Initial Model ref
+const initialModelRef = ref(storage, 'IfcModels/sexample.ifc')
+
+// fetch all files in Model folder
+// Create a reference under which you want to list
+//Container to store all models information
+var modelsKvp = [];
+
+function listAllFiles(folder){
+  const storage = getStorage();
+
+  const listRef = ref(storage, folder);
+
+  listAll(listRef)
+  .then((res) => {
+    res.prefixes.forEach((folderRef) => {
+      // All the prefixes under listRef.
+      // You may call listAll() recursively on them.
+    });
+    res.items.forEach((itemRef) => {
+      // All the items under listRef.
+
+      // Grade Metadata
+      getMetadata(itemRef).then((metadata) => {
+        modelsKvp.push({ 
+          fileName : metadata.name,
+          fileSize : metadata.size/(10**6)
+        });
+
+        updateModelsDropDown(metadata.name);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+      getDownloadURL(itemRef).then((url) => {
+        console.log("download Url: " + url);
+      });
+    });
+  }).catch((error) => {
+    // Uh-oh, an error occurred!
+    console.log(error);
+  });
+}
+
+
+function listAndConsoleLog()
+{
+  listAllFiles("IfcModels/")
+  modelsKvp.forEach(element => {
+    console.log("Filename : " + element.fileName, "Filesize : " + element.fileSize);
+  });
+} 
+
+listAndConsoleLog();
+
+// Get the download URL
+
+//#region firebase functions
+//function to fetch model from server
+
+
+
+//#endregion
+
+
+// Create a reference under which you want to list
+// const listRef = ref(storage, 'IfcModels/');
+// console.log(listRef);
+
+// var modelsList = [];
+
+// // Find all the prefixes and items.
+// listAll(listRef)
+//   .then((res) => {
+//     res.prefixes.forEach((folderRef) => {
+//       // All the prefixes under listRef.
+//       // You may call listAll() recursively on them.
+//     });
+//     res.items.forEach((itemRef) => {
+//       modelsList.push(itemRef);
+//       getDownoadURL(itemRef).then((url) => {
+//         console.log("download url:" + url);
+//       })
+//     });
+//   }).catch((error) => {
+//     console.log(error);
+//     // Uh-oh, an error occurred!
+//   });
+
+// console.log(modelsList.length);
+//#endregion
+
+//#region Three Js Viewer
 //Set Up three.js scene*******************************************************************************************************************************
 //Creates the Three.js scene
+
 const scene = new Scene();
 
 //Object to store the size of the viewport
@@ -80,13 +241,18 @@ window.addEventListener("resize", () => {
 
 
 //IFC Loader*****************************************************************************************************************************************
-// Sets up the IFC loading
+// Sets up the IFC loader
 const ifcLoader = new IFCLoader();
-ifcLoader.ifcManager.setupThreeMeshBVH(computeBoundsTree, 
-  disposeBoundsTree, acceleratedRaycast); // Sets up optimized picking
-var ifcLoadedModel; // Container to store the IFC models
+
+//Sets up optimized picking
+// ifcLoader.ifcManager.setupThreeMeshBVH(computeBoundsTree, disposeBoundsTree, acceleratedRaycast);
+
+var ifcLoadedModel = []; // Container to store the IFC models
 
 ifcLoader.ifcManager.setWasmPath("../"); // Sets up wasm location
+
+//IFC Manager
+const ifc = ifcLoader.ifcManager;
 
 // function loadIFC(ifcPath){
 //   ifcLoader.load(ifcPath, async (ifcModel) => {
@@ -95,26 +261,98 @@ ifcLoader.ifcManager.setWasmPath("../"); // Sets up wasm location
 //   })
 // }
 
-function addLoadingScreen(){
-  document.getElementById("loading").classList.remove("loader--hidden");
-}
-
-function removeLoadingScreen(){
-  document.getElementById("loading").classList.add("loader--hidden");
-}
-
-function loadIFC(ifcPath){
+function loadIFC(ifcPath, fileName){
+  //Add loading screen to UI
   addLoadingScreen();
-  ifcLoader.load(ifcPath, ifcModel => {
-    scene.remove(ifcLoadedModel);
-    ifcLoadedModel = ifcModel;
+
+  ifcLoader.load(ifcPath, (ifcModel) => {
+
+    scene.remove(ifcLoadedModel[0]);
+
+    ifcLoadedModel[0] = ifcModel;
+
     scene.add(ifcModel);
+
+    //translate the model temporary!
+    if(fileName == "SETIA KASIH-BEST-XX-XX-X-V-ARCH-1001_Rev 3.ifc"){
+      ifcLoadedModel[0].translateY(-108);
+      camera.position.x = -17.90435992387824;
+      camera.position.y = 14.065288729517526;
+      camera.position.z = 35.479837665201515;
+
+    }
+    //Remove loading screen
     removeLoadingScreen();
   })
 }
 
+//Load IFC from remote server
+function loadModelWithFileName(fileName){
+  //Firebase Ref
+  const modelRef = ref(storage, ('IfcModels/' + fileName));
+
+  getDownloadURL(modelRef)
+  .then((url) => {
+    //This can be downloaded directly:
+    const xhr = new XMLHttpRequest();
+    xhr.responseType = 'blob';
+
+    //Listen for 'progress' event
+    xhr.onprogress = event => {
+
+      // event.loaded returns how many bytes are downloaded
+      // event.total returns the total number of bytes
+      // event.total is only available if server sends `Content-Length` header
+      // console.log(`Downloaded ${event.loaded} of ${event.total} bytes`)
+      console.log(`Downloaded ${Math.round(event.loaded/event.total) * 100}% bytes`)
+    }
+
+    xhr.onload = (event) => {
+      const blob = xhr.response;
+      link = URL.createObjectURL(blob);
+
+      //Load IFC file
+      loadIFC(link, fileName);
+
+
+    };
+    xhr.open('GET', url);
+    xhr.send()
+
+    setModel(fileName);
+    console.log("Fetch Model Success");
+  })
+  .catch((error) => {
+    // A full list of error codes is available at
+    // https://firebase.google.com/docs/storage/web/handle-errors
+    switch (error.code) {
+      case 'storage/object-not-found':
+        console.log("File doesn't exist")
+        break;
+      case 'storage/unauthorized':
+        console.log("User doesn't have permission to access the object")
+        break;
+      case 'storage/canceled':
+        console.log("User canceled the upload")
+        break;
+  
+      // ...
+  
+      case 'storage/unknown':
+        // Unknown error occurred, inspect the server response
+        break;
+    }
+  });
+}
+
+//Load the current model in url
+loadModelWithFileName(getUrlModelParam());
+
 // Load ifc file from local
-loadIFC("models/Revit_sample.ifc");
+
+
+// loadIFC("/example.ifc");
+
 
 // Load ifc file from input button
 const input = document.getElementById("file-input");
@@ -124,81 +362,137 @@ input.addEventListener(
     addLoadingScreen();
     const file = changed.target.files[0];
     var ifcURL = URL.createObjectURL(file);
+
+    //Load IFC
     loadIFC(ifcURL);
   },
   false
 );
 
-// ***** Clipping planes: *****
-const gui = new dat.GUI();
-const localPlane = new THREE.Plane( new THREE.Vector3( 0, - 1, 0 ), 0.8 );
+// //Set Up Ray Casting
+// const raycaster = new Raycaster();
+// raycaster.firstHitOnly = true;
+// const mouse = new Vector2();
 
-// ***** Clipping setup (renderer): *****
-renderer.localClippingEnabled = true;
-folderLocal = gui.addFolder( 'Local Clipping' ),
-propsLocal = {
+// function cast(event) {
+//   // Computes the position of the mouse on the screen
+//   const bounds = threeCanvas.getBoundingClientRect();
 
-  get 'Enabled'() {
+//   const x1 = event.clientX - bounds.left;
+//   const x2 = bounds.right - bounds.left;
+//   mouse.x = (x1 / x2) * 2 - 1;
 
-    return renderer.localClippingEnabled;
+//   const y1 = event.clientY - bounds.top;
+//   const y2 = bounds.bottom - bounds.top;
+//   mouse.y = -(y1 / y2) * 2 + 1;
 
-  },
-  set 'Enabled'( v ) {
+//   // Places it on the camera pointing to the mouse
+//   raycaster.setFromCamera(mouse, camera);
 
-    renderer.localClippingEnabled = v;
+//   // Casts a ray
+//   return raycaster.intersectObjects(ifcLoadedModel);
+// }
 
-  },
+// //Highlist when hover
+// //Creates subset material
+// const preselectMat = new MeshLambertMaterial({
+//   transparent: true,
+//   opacity: 0.6,
+//   color: 0xff88ff,
+//   depthTest: false,
+// });
 
-  get 'Shadows'() {
+// // Event that gets executed when an item is picked
+// async function pick(event) {
+//   const found = cast(event)[0];
+//   if (found) {
+//     const index = found.faceIndex;
+//     const geometry = found.object.geometry;
+//     const ifc = ifcLoader.ifcManager;
+//     const id = ifc.getExpressId(geometry, index);
+//     console.log(id);
+//   }
+// }
+// threeCanvas.ondblclick = pick;
+// function highlight(event, material, model) {
+//   const found = cast(event)[0];
+//   if (found) {
+//     // Gets model ID
+//     model.id = found.object.modelID;
 
-    return material.clipShadows;
+//     // Gets Express ID
+//     const index = found.faceIndex;
+//     const geometry = found.object.geometry;
+//     const id = ifc.getExpressId(geometry, index);
 
-  },
-  set 'Shadows'( v ) {
+//     // Creates subset
+//     ifcLoader.ifcManager.createSubset({
+//       modelID: model.id,
+//       ids: [id],
+//       material: material,
+//       scene: scene,
+//       removePrevious: true,
+//     });
+//   } else {
+//     // Removes previous highlight
+//     ifc.removeSubset(model.id, material);
+//   }
+// }
 
-    material.clipShadows = v;
+// window.onmousemove = (event) => highlight(event, preselectMat, ifcLoadedModel);
 
-  },
 
-  get 'Plane'() {
 
-    return localPlane.constant;
+// // ***** Clipping planes: *****
+// const gui = new dat.GUI();
+// const localPlane = new THREE.Plane( new THREE.Vector3( 0, - 1, 0 ), 0.8 );
 
-  },
-  set 'Plane'( v ) {
+// // ***** Clipping setup (renderer): *****
+// renderer.localClippingEnabled = true;
+// folderLocal = gui.addFolder( 'Local Clipping' ),
+// propsLocal = {
 
-    localPlane.constant = v;
+//   get 'Enabled'() {
 
-  }
+//     return renderer.localClippingEnabled;
 
-}
-folderLocal.add( propsLocal, 'Enabled' );
-folderLocal.add( propsLocal, 'Shadows' );
-folderLocal.add( propsLocal, 'Plane', 0.3, 1.25 );
+//   },
+//   set 'Enabled'( v ) {
 
+//     renderer.localClippingEnabled = v;
+
+//   },
+
+//   get 'Shadows'() {
+
+//     return material.clipShadows;
+
+//   },
+//   set 'Shadows'( v ) {
+
+//     material.clipShadows = v;
+
+//   },
+
+//   get 'Plane'() {
+
+//     return localPlane.constant;
+
+//   },
+//   set 'Plane'( v ) {
+
+//     localPlane.constant = v;
+
+//   }
+
+// }
+// folderLocal.add( propsLocal, 'Enabled' );
+// folderLocal.add( propsLocal, 'Shadows' );
+// folderLocal.add( propsLocal, 'Plane', 0.3, 1.25 );
+
+//#endregion
 /* // Create a function for the Raycaster to cast rays, calculating the position of the mouse on the screen
-const raycaster = new Raycaster();
-raycaster.firstHitOnly = true;
-const mouse = new Vector2();
 
-function cast(event) {
-  // Computes the position of the mouse on the screen
-  const bounds = threeCanvas.getBoundingClientRect();
-
-  const x1 = event.clientX - bounds.left;
-  const x2 = bounds.right - bounds.left;
-  mouse.x = (x1 / x2) * 2 - 1;
-
-  const y1 = event.clientY - bounds.top;
-  const y2 = bounds.bottom - bounds.top;
-  mouse.y = -(y1 / y2) * 2 + 1;
-
-  // Places it on the camera pointing to the mouse
-  raycaster.setFromCamera(mouse, camera);
-
-  // Casts a ray
-  return raycaster.intersectObjects(ifcLoadedModel);
-}
 
 async function pick(event) {
   const found = cast(event)[0];

@@ -62,8 +62,10 @@ body {
   box-shadow: 15px 15px 10px 5px rgba(0, 0, 0, 0.10);
   background-image: linear-gradient(180deg, #d9d9d9, #6e6e6e);
 }
-.botBar{
+
+.topBar2{
   display: flex;
+  justify-content: space-between;
   height: 18px;
   background-color: #3D3E42;
   padding: 10px;
@@ -94,7 +96,7 @@ input[type="file"]{
 
 .topbarWrapper{
   height: 50px;
-  padding: 0px 20px;
+  padding: 0px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -115,9 +117,13 @@ input[type="file"]{
   justify-content: center;
 }
 
-.plytecLogo{
+.dropDownBtn{
+
+}
+
+.Logo{
   height: 50px;
-  padding: 0px 30px;
+  padding: 0px;
 }
 
 .ownerDescription{
