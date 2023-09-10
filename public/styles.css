@@ -20,6 +20,7 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  background-image: linear-gradient(180deg, #d9d9d9, #6e6e6e);
 }
 
 .loader{
@@ -60,7 +61,7 @@ body {
   top: 0;
   left: 0;
   box-shadow: 15px 15px 10px 5px rgba(0, 0, 0, 0.10);
-  background-image: linear-gradient(180deg, #d9d9d9, #6e6e6e);
+ 
 }
 
 .topBar2{
@@ -180,5 +181,24 @@ input[type="file"]{
 
 .copyright {
   position: absolute;
-  
 }
+
+.fileInputLogo{
+    width: 20px;
+    height: auto;
+}
+
+/*dark mode*/
+.dark-mode .topBar2{
+  background-color: #F5F5F5;
+}
+
+.dark-mode .topbar{
+  background-color: #cfd8dc;
+}
+
+.dark-mode .ownerDescription h4,
+.dark-mode .topLeft h4{
+  color: black;
+}
+
