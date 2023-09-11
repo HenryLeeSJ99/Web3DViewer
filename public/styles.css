@@ -28,6 +28,10 @@ body {
   overflow: hidden;
 }
 
+.viewer{
+  transition: background-color 0.5s ease;
+}
+
 .loader {
   position: fixed;
   top: 0;
