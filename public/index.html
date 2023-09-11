@@ -43,12 +43,17 @@
         <select id="modelsDropDown">Select Models
         </select>
       </div> -->
+<<<<<<< HEAD
       
       <div class="darkmodeBtn">
         <input type="checkbox" id="dark-mode" onchange="toggleDarkMode()">
         <label class="darkmode" for="dark-mode"></label>
       </div>
       
+=======
+
+      <button class="modeBtn" onclick="myFunction()">Toggle dark mode</button>
+>>>>>>> aab8160c35d91bc5bf49ade39c1a7b14709c3e9a
 
     </div>
   </div>
@@ -62,6 +67,7 @@
   </div>
   <script src="src/bundle.js"></script>
   <script>
+<<<<<<< HEAD
     function toggleDarkMode() {
       const darkModeCheckbox = document.getElementById('dark-mode');
       const body = document.body;
@@ -75,6 +81,11 @@
         body.classList.remove('dark-mode');
         console.log("darkmode removed")
       }
+=======
+    function myFunction() {
+       var element = document.body;
+       element.classList.toggle("dark-mode");
+>>>>>>> aab8160c35d91bc5bf49ade39c1a7b14709c3e9a
     }
   </script>
 </body>

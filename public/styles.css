@@ -26,11 +26,15 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+<<<<<<< HEAD
   background-image: linear-gradient(
     180deg,
     var(--lightmodeColor1),
     var(--lightmodeColor2)
   );
+=======
+  background-image: linear-gradient(180deg, #d9d9d9, #6e6e6e);
+>>>>>>> aab8160c35d91bc5bf49ade39c1a7b14709c3e9a
 }
 
 .loader {
@@ -74,7 +78,12 @@ body {
 .three-canvas {
   top: 0;
   left: 0;
+<<<<<<< HEAD
   box-shadow: 15px 15px 10px 5px rgba(0, 0, 0, 0.1);
+=======
+  box-shadow: 15px 15px 10px 5px rgba(0, 0, 0, 0.10);
+ 
+>>>>>>> aab8160c35d91bc5bf49ade39c1a7b14709c3e9a
 }
 
 .topBar2 {
@@ -193,6 +202,7 @@ input[type="file"] {
   position: absolute;
 }
 
+<<<<<<< HEAD
 .fileInputLogo {
   width: 20px;
   height: auto;
@@ -260,3 +270,24 @@ input:checked ~ label {
     var(--darkmodeColor2));
   transition: background-color 0.5s ease;
 }
+=======
+.fileInputLogo{
+    width: 20px;
+    height: auto;
+}
+
+/*dark mode*/
+.dark-mode .topBar2{
+  background-color: #F5F5F5;
+}
+
+.dark-mode .topbar{
+  background-color: #cfd8dc;
+}
+
+.dark-mode .ownerDescription h4,
+.dark-mode .topLeft h4{
+  color: black;
+}
+
+>>>>>>> aab8160c35d91bc5bf49ade39c1a7b14709c3e9a
