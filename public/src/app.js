@@ -31,7 +31,6 @@ function updateModelsDropDown(fileName){
 
   modelsDropDown.appendChild(option);
 }
-
 //#endregion
 
 //#region URLParams

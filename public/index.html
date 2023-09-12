@@ -22,7 +22,8 @@
   <div class="topbar">
     <div class="topbarWrapper">
       <div class="topLeft">
-        <img class="Logo" src="iconsa/Capture.png" alt="">
+        <img class="Logo" src="/public/iconsa/OctagonLogo.png" alt="">
+        <h4>Web3DViewer</h4>
       </div>
       <div class="ownerDescription">
         <h4>3D Viewer by H.L.</h4>
@@ -33,7 +34,7 @@
         <!-- <label for=""></label>
         <i class="fa-solid fa-bars"></i> -->
         <label for="file-input" class="custom-file-upload">
-          <i class="fa-solid fa-upload"></i>
+          <img class="fileInputLogo" src="/public/iconsa/Upload.png" alt="upload_icon">
         </label>
         <input class="file-input" id="file-input" type="file" name="load" />
       </div>
@@ -42,19 +43,40 @@
         <select id="modelsDropDown">Select Models
         </select>
       </div> -->
+      
+      <div class="darkmodeBtn">
+        <input type="checkbox" id="dark-mode" onchange="toggleDarkMode()">
+        <label class="darkmode" for="dark-mode"></label>
+        <div class="background"></div>
+      </div>
+    
+
     </div>
   </div>
-        </div>
-      </div>
-    </div>
-    <div class="viewer">
-      <canvas class="three-canvas" id="three-canvas"></canvas>
-      <div class="copyright"> <h4> Developed by Henry 2023</h4> </div>
-    </div>
-    
+
+  <div class="viewer">
+    <canvas class="three-canvas" id="three-canvas"></canvas>
+  </div>
+  <div class="copyright"> <h4> Developed by Henry 2023 </h4> </div>
 
   </div>
   <script src="src/bundle.js"></script>
+  <script>
+    function toggleDarkMode() {
+      const darkModeCheckbox = document.getElementById('dark-mode');
+      const body = document.body;
+
+      if (darkModeCheckbox.checked) {
+        // Enable dark mode
+        body.classList.add('dark-mode');
+        console.log("darkmode")
+      } else {
+        // Disable dark mode
+        body.classList.remove('dark-mode');
+        console.log("darkmode removed")
+      }
+    }
+  </script>
 </body>
 
 </html>
