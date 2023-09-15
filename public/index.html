@@ -17,8 +17,32 @@
 
 <body>
   <div id="loading" class="loader loader--hidden">
-
   </div>
+
+  <div id="sidebarBody">
+    <header>
+      <div class="logoContainer">
+        <img src="/public/iconsa/OctagonLogo.png" alt="Logo">
+        <h4>Web3D Viewer</h4>
+      </div>
+    </header>
+
+    <div class="sidebarContainer">
+      <ul class="linkContainer">
+        <li class="navLink"><a href="">Link 1</a></li>
+        <li class="navLink"><a href="">Link 2</a></li>
+        <li class="navLink"><a href="">Link 3</a></li>
+      </ul>
+
+      <label for="setting-close" class="setting-setup">
+        <div class="sidebarCloseBtn">
+          <h3>CLOSE</h3>
+          <input type="button" class="setupBtn" id="setting-close" onclick="sidebarClose()">
+        </div>
+      </label>
+    </div>
+  </div>
+
   <div class="topbar">
     <div class="topbarWrapper">
       <div class="topLeft">
@@ -31,6 +55,11 @@
     </div>
     <div class="topBar2">
       <div class="buttons">
+
+        <label for="setting-open" class="setting-setup">
+          <img src="/public/iconsa/setup.png" alt="setup_icon" class="setupIcon">
+        </label>
+        <input type="button" id="setting-open" onclick="sidebarOpen()">
         <!-- <label for=""></label>
         <i class="fa-solid fa-bars"></i> -->
         <label for="file-input" class="custom-file-upload">
@@ -76,6 +105,15 @@
         console.log("darkmode removed")
       }
     }
+
+    function sidebarOpen() {
+      document.getElementById('sidebarBody').style.display = "block";
+    }
+
+    function sidebarClose() {
+      document.getElementById('sidebarBody').style.display = "none";
+    }
+    
   </script>
 </body>
 

@@ -87,9 +87,6 @@ input[type="file"] {
   display: none;
 }
 
-
-
-
 .custom-file-upload {
   padding: 0px 20px;
   color: #d9d9d9;
@@ -253,3 +250,71 @@ input:checked ~ label {
   color: var(--lightmodeColor2);
 }
 
+/* SideBar */
+
+.logoContainer{
+  display: flex;
+}
+
+.logoContainer img{
+  width: 50px;
+  height: 50px;
+  position: relative;
+  align-self: center;
+}
+
+.setting-setup {
+  cursor: pointer;
+  padding: 0px 20px;
+  color: #d9d9d9;
+  height: 22px;
+  width: 22px;
+}
+
+#setting-open, #setting-close{
+  display: none;
+}
+
+.setupIcon{
+  position: relative;
+  height: 20px;
+  width: 25px;
+}
+
+#sidebarBody{
+  padding: 10px 14px;
+  position: fixed;
+  height: 100%;
+  width: 20%;
+  background-color: var(--lightmodeColor2);
+  z-index: 5;
+}
+
+.setupBtn {
+  width: 100px; 
+}
+
+.sidebarCloseBtn {
+  background-color: var(--lightmodeColor1);
+  text-align: center;
+}
+
+.sidebarCloseBtn h3{
+  color: var(--darkmodeColor1);
+}
+
+.linkContainer {
+  position: relative;
+  padding: 10px 0px 0px 0px;
+  display: grid;
+  gap: 70px;
+  place-items: center;
+}
+
+.navLink{
+  display: grid;
+  place-items: center;
+  list-style: none;
+  width: 100%;
+  background-color: red;
+}
