@@ -271,7 +271,7 @@ input:checked ~ label {
   width: 22px;
 }
 
-#setting-open, #setting-close{
+#setting-open, #setting-close,#dropdownBtn{
   display: none;
 }
 
@@ -288,6 +288,19 @@ input:checked ~ label {
   width: 20%;
   background-color: var(--lightmodeColor2);
   z-index: 5;
+  transition: 0.5s ease;
+  transform: translateX(-100%);
+}
+
+#sidebarBody.active{
+  padding: 10px 14px;
+  position: fixed;
+  height: 100%;
+  width: 20%;
+  background-color: var(--lightmodeColor2);
+  z-index: 5;
+  transition: 0.5s ease;
+  transform: translateX(0%);
 }
 
 .setupBtn {
@@ -315,6 +328,23 @@ input:checked ~ label {
   display: grid;
   place-items: center;
   list-style: none;
-  width: 100%;
+  width: 50%;
+  height: 40px;
   background-color: red;
+  border-radius: 10px;
 }
+
+.navLink:hover{
+  background-color: #242424;
+}
+
+#sidebarBody.dark-mode{
+  background-color: var(--darkmodeColor1);
+  transition: 0.5s;
+}
+
+.navLink a{
+  text-decoration: none;
+}
+
+.drop

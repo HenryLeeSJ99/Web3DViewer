@@ -29,6 +29,12 @@
 
     <div class="sidebarContainer">
       <ul class="linkContainer">
+        <label for="dropdownBtn">
+          <div class="dropdownBtnContainer">
+            <h3>DropDown</h3>
+            <input type="button" id="dropdownBtn">
+          </div>
+        </label>
         <li class="navLink"><a href="">Link 1</a></li>
         <li class="navLink"><a href="">Link 2</a></li>
         <li class="navLink"><a href="">Link 3</a></li>
@@ -93,25 +99,34 @@
   <script>
     function toggleDarkMode() {
       const darkModeCheckbox = document.getElementById('dark-mode');
+      const sidebarBody = document.getElementById('sidebarBody');
       const body = document.body;
 
       if (darkModeCheckbox.checked) {
         // Enable dark mode
         body.classList.add('dark-mode');
+        sidebarBody.classList.add('dark-mode');
         console.log("darkmode")
       } else {
         // Disable dark mode
+        sidebarBody.classList.remove('dark-mode');
         body.classList.remove('dark-mode');
         console.log("darkmode removed")
       }
     }
 
     function sidebarOpen() {
-      document.getElementById('sidebarBody').style.display = "block";
+      const sidebarBody = document.getElementById('sidebarBody');
+      sidebarBody.classList.add('active');
+      
+      console.log("sidebar Open");
     }
 
     function sidebarClose() {
-      document.getElementById('sidebarBody').style.display = "none";
+      const sidebarBody = document.getElementById('sidebarBody');
+      sidebarBody.classList.remove('active');
+      
+      console.log("sidebar Close");
     }
     
   </script>
