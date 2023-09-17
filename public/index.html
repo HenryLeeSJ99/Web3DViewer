@@ -52,7 +52,7 @@
   <div class="topbar">
     <div class="topbarWrapper">
       <div class="topLeft">
-        <img class="Logo" src="/public/iconsa/OctagonLogo.png" alt="">
+        <img class="Logo" src="../../../public/iconsa/OctagonLogo.png" alt="">
         <h4>Web3DViewer</h4>
       </div>
       <div class="ownerDescription">
@@ -68,10 +68,31 @@
         <input type="button" id="setting-open" onclick="sidebarOpen()">
         <!-- <label for=""></label>
         <i class="fa-solid fa-bars"></i> -->
-        <label for="file-input" class="custom-file-upload">
-          <img class="fileInputLogo" src="/public/iconsa/Upload.png" alt="upload_icon">
+        <label for="file-input" class="functionButtons">
+          <img class="fileInputLogo" src="../../../public/iconsa/export.png" alt="upload_icon">
+          <span class="toolTip">Upload</span>
         </label>
         <input class="file-input" id="file-input" type="file" name="load" />
+        <div class="functionButtons" id="zoomToExtentBtn">
+          <img src="../../../public/iconsa/download.png" alt="Icon">
+          <span class="toolTip">Download</span>
+        </div>
+        <div class="functionButtons" id="zoomToExtentBtn">
+          <img src="../../../public/iconsa/Model Sharing.png" alt="Icon">
+          <span class="toolTip">Model Sharing</span>
+        </div>
+        <div class="vl"></div>
+
+        <div class="functionButtons" id="zoomToExtentBtn">
+          <img src="../../../public/iconsa/Fit to Frame.png" alt="Icon">
+          <span class="toolTip">Zoom To Fit</span>
+        </div>
+
+        <div class="vl"></div>
+        <div class="functionButtons" id="zoomToExtentBtn">
+          <img src="../../../public/iconsa/Ruler.png" alt="Icon">
+          <span class="toolTip">Ruler</span>
+        </div>
       </div>
       <!-- <div class="dropDownBtn">
         <label for="models">Loaded Model:</label>

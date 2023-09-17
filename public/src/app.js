@@ -7,7 +7,7 @@ import { IFCWALLSTANDARDCASE, IFCSLAB, IFCDOOR, IFCWINDOW, IFCFURNISHINGELEMENT,
 import * as dat from 'dat.gui';
 import { initializeApp } from "firebase/app";
 import { getStorage, ref, listAll, getDownloadURL, getMetadata } from "firebase/storage";
-
+import * as THREE from 'three';
 
 //#region UI Controller
 function addLoadingScreen(){
@@ -218,7 +218,7 @@ scene.add(axes);
 //Creates the orbit controls (to navigate the scene)
 const controls = new OrbitControls(camera, threeCanvas);
 controls.enableDamping = true;
-controls.target.set(-2, 0, 0);
+// controls.target.set(-2, 0, 0);
 
 //Animation loop
 const animate = () => {
@@ -280,6 +280,9 @@ function loadIFC(ifcPath, fileName){
       camera.position.z = 35.479837665201515;
 
     }
+
+    fitCameraToScene(camera,scene);
+
     //Remove loading screen
     removeLoadingScreen();
   })
@@ -368,6 +371,84 @@ input.addEventListener(
   },
   false
 );
+
+//Show the bounding box of the element
+function showBoundingBox(boundingBox){
+  // Create a wireframe material
+  const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+  // Calculate dimensions and center of the bounding box
+  const boxDimensions = boundingBox.getSize(new THREE.Vector3());
+  const boxCenter = boundingBox.getCenter(new THREE.Vector3());
+
+  // Create a wireframe box
+  const wireframeGeometry = new THREE.BoxGeometry(boxDimensions.x, boxDimensions.y, boxDimensions.z);
+  const wireframeBox = new THREE.Mesh(wireframeGeometry, wireframeMaterial);
+
+  wireframeBox.position.copy(boxCenter);
+
+  // Add the wireframe box to the scene
+  scene.add(wireframeBox);
+
+  renderer.render(scene, camera); 
+}
+
+// Get Fit Camera Button
+const fitCameraButton = document.getElementById("zoomToExtentBtn");
+fitCameraButton.addEventListener(
+  "click",
+  () => {
+  fitCameraToScene();
+  console.log("Fit to Scene Buttons Clicked");}
+);
+
+function fitCameraToScene() {
+  if(ifcLoadedModel.length > 0){
+    const boundingBox = new THREE.Box3();
+
+    // Iterate through all objects in the scene to calculate the bounding box
+    scene.traverse((object) => {
+      if (object.isMesh) {
+        const geometry = object.geometry;
+        geometry.computeBoundingBox();
+        boundingBox.expandByObject(object);
+      }
+    });
+  
+    const center = new THREE.Vector3();
+    boundingBox.getCenter(center);
+  
+    // Show bounding box
+    showBoundingBox(boundingBox);
+  
+    console.log("Center = " + center);
+  
+    const radius = boundingBox.getSize(new THREE.Vector3()).length() / 2;
+    const distance = radius / Math.tan((Math.PI / 180) * (camera.fov / 2));
+  
+    camera.position.set(center.x - distance/3, center.y + distance/3, center.z + distance);
+    camera.lookAt(center);
+  
+    // Update Controls
+    controls.target.set(center.x, center.y, center.z)
+    controls.update();
+  
+    camera.updateProjectionMatrix();
+    renderer.render(scene, camera); 
+  }
+  else{
+    console.log("No Model has been loaded");
+  }
+}
+
+
+
+
+
+
+
+
+
+
 
 // //Set Up Ray Casting
 // const raycaster = new Raycaster();
