@@ -2,7 +2,7 @@
   --darkmodeColor1: #2a2b2e;
   --darkmodeColor2: #3d3e42;
   --lightmodeColor1: #cfd8dc;
-  --lightmodeColor2: #fefbe7;
+  --lightmodeColor2: #E7EBED;
 }
 
 h1 {
@@ -29,7 +29,8 @@ body {
 }
 
 .viewer{
-  transition: background-color 0.5s ease;
+  transition: background-color 0.2s ease;
+  background-color: var(--lightmodeColor1);
 }
 
 .loader {
@@ -78,23 +79,41 @@ body {
 .topBar2 {
   display: flex;
   justify-content: space-between;
-  height: 18px;
+  height: 38px;
   background-color: var(--lightmodeColor2);
-  padding: 10px;
-  transition: background-color 0.5s ease;
+  padding: 0px;
+  transition: background-color 0.2s ease;
 }
 input[type="file"] {
   display: none;
 }
 
+.buttons{
+  display: flex;
+}
 
-
+.functionButtons {
+  height : 38px;
+  width: 38px;
+  cursor: pointer;
+}
+.functionButtons img {
+  padding: 8px;
+  height : 22px;
+  width: 22px;
+  fill: #cfd8dc;
+}
+.functionButtons:hover {
+background-color: var(--lightmodeColor1);
+transition: background-color 0.2s ease;
+}
 
 .custom-file-upload {
-  padding: 0px 20px;
+  padding: 8px 8px;
   color: #d9d9d9;
   height: 22px;
   width: 22px;
+  cursor: pointer;
 }
 
 .topbar {
@@ -103,7 +122,7 @@ input[type="file"] {
   position: sticky;
   top: 0;
   z-index: 1;
-  transition: background-color 0.5s ease;
+  transition: background-color 0.2s ease;
 }
 
 .topbar h4 {
@@ -196,6 +215,10 @@ input[type="file"] {
 .fileInputLogo {
   width: 20px;
   height: auto;
+}
+
+.darkmodeBtn {
+  padding: 10px;
 }
 
 /*dark mode*/
