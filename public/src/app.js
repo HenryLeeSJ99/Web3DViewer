@@ -372,6 +372,7 @@ input.addEventListener(
   false
 );
 
+//Show the bounding box of the element
 function showBoundingBox(boundingBox){
   // Create a wireframe material
   const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
@@ -391,6 +392,7 @@ function showBoundingBox(boundingBox){
   renderer.render(scene, camera); 
 }
 
+// Get Fit Camera Button
 const fitCameraButton = document.getElementById("zoomToExtentBtn");
 fitCameraButton.addEventListener(
   "click",
@@ -423,7 +425,7 @@ function fitCameraToScene() {
     const radius = boundingBox.getSize(new THREE.Vector3()).length() / 2;
     const distance = radius / Math.tan((Math.PI / 180) * (camera.fov / 2));
   
-    camera.position.set(center.x, center.y + distance, center.z - distance);
+    camera.position.set(center.x - distance/3, center.y + distance/3, center.z + distance);
     camera.lookAt(center);
   
     // Update Controls
@@ -437,6 +439,7 @@ function fitCameraToScene() {
     console.log("No Model has been loaded");
   }
 }
+
 
 
 

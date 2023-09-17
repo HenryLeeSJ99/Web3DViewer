@@ -1,6 +1,6 @@
 :root {
   --darkmodeColor1: #2a2b2e;
-  --darkmodeColor2: #3d3e42;
+  --darkmodeColor2: #4e4f53;
   --lightmodeColor1: #cfd8dc;
   --lightmodeColor2: #E7EBED;
 }
@@ -93,6 +93,8 @@ input[type="file"] {
 }
 
 .functionButtons {
+  display:flex;
+  flex-direction: column;
   height : 38px;
   width: 38px;
   cursor: pointer;
@@ -103,17 +105,29 @@ input[type="file"] {
   width: 22px;
   fill: #cfd8dc;
 }
+
 .functionButtons:hover {
 background-color: var(--lightmodeColor1);
 transition: background-color 0.2s ease;
 }
 
-.custom-file-upload {
-  padding: 8px 8px;
-  color: #d9d9d9;
-  height: 22px;
-  width: 22px;
-  cursor: pointer;
+.functionButtons:hover .toolTip {
+  visibility: visible;
+}
+
+.toolTip {
+  position: absolute;
+  text-align: center;
+  width: 80px;
+  background-color: var(--darkmodeColor2);
+  padding: 10px 20px 10px 10px;
+  top: 8px;
+  position: relative;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-weight: 500;
+  border-radius: 6px;
+  color: #ffffff;
+  visibility: hidden;
 }
 
 .topbar {
@@ -131,7 +145,7 @@ transition: background-color 0.2s ease;
 
 .topbarWrapper {
   height: 50px;
-  padding: 0px 10px;
+  padding: 0px 10px 0px 0px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -152,6 +166,15 @@ transition: background-color 0.2s ease;
   justify-content: center;
 }
 
+.vl {
+  border-left: 1px solid var(--darkmodeColor1);
+  height: 38px;
+}
+
+.dark-mode .vl{
+  border-left: 1px solid var(--lightmodeColor1);
+  transition: background-color 0.2s ease;
+}
 
 .Logo {
   height: 50px;
