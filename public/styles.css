@@ -222,11 +222,17 @@ transition: background-color 0.2s ease;
   padding: 0px;
 }
 
-.ownerDescription {
+.topRightButtons {
+  align-items: center;
+  display: flex;
   margin: 0px;
   padding: 0px;
 }
 
+.topRightButtons .functionButtons{
+  height: 25px;
+  width: 25x;
+}
 .container {
   background-color: #2a2b2e;
   display: flex;
