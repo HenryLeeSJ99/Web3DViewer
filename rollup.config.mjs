@@ -1,15 +1,16 @@
 import resolve from "@rollup/plugin-node-resolve";
-import dotenv from 'dotenv';
 import multi from '@rollup/plugin-multi-entry';
+import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'; // Import the JSON plugin
 
-dotenv.config()
+
 export default {
-  input: ["public/src/firebaseApp.js","public/src/app.js"],
+  input: ["public/src/app.js"],
   output: [
     {
       format: "esm",
       file: "public/src/bundle.js",
     },
   ],
-  plugins: [multi(), resolve()],
+  plugins: [multi(), resolve(), commonjs(), json()],
 };
