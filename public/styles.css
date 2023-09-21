@@ -34,6 +34,7 @@ body {
   height: calc(100vh - 88px);
   transition: background-color 0.2s ease;
   background-color: var(--lightmodeColor1);
+  z-index: 0;
 }
 
 .loader {
@@ -49,6 +50,7 @@ body {
   opacity: 50%;
   transition: opacity 0.75s, visibility 0.75s;
   text-align: center;
+  z-index: 1;
 }
 
 .loader--hidden {
@@ -102,7 +104,8 @@ body {
   border: 2px solid var(--darkmodeColor2);
   border-radius: 15px;
   overflow: hidden;
-  transition: visibility 0.3s ease; /* Smooth transition for width changes */    
+  transition: visibility 0.3s ease; /* Smooth transition for width changes */
+  z-index: 1; 
 }
 
 .progressBar .color {
