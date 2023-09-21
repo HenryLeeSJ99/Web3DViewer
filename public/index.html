@@ -17,8 +17,53 @@
 
 <body>
   <div id="loading" class="loader loader--hidden">
-
   </div>
+
+  <div id="sidebarBody">
+      <div class="logoContainer">
+        <img src="/public/iconsa/OctagonLogo.png" class="sidebarLogo" alt="OctagonLogo">
+        <h3>Web3DViewer</h3>
+
+      </div>
+
+
+    <hr class="sidebarBreak">
+
+    <div class="menuContainer">
+        <div class="dropdownContainer">
+          <ul>
+            <li class="navLink"><a href="">Projects1</a></li>
+            <li class="navLink"><a href="">Projects2</a></li>
+            <li class="navLink"><a href="">Projects3</a></li>
+            <li class="navLink"><a href="">Projects4</a></li>
+            <li class="navLink"><a href="">Projects5</a></li>
+          </ul>
+        </div>
+
+      <div class="menu" onclick="dropdownActive()">
+        <h4>Projects</h4>
+        
+      </div>
+  
+      <div class="menu">
+        <h4>empty</h4>
+      </div>
+  
+      <div class="menu">
+        <h4>empty</h4>
+      </div>
+
+        
+      </div>
+      
+    
+      <div class="exitMenu" onclick="sideBarClose()">
+        <h4>Close</h4>
+      </div>
+    </div>
+  </div>
+
+
   <div class="topbar">
     <div class="topbarWrapper">
       <div class="topLeft">
@@ -31,6 +76,18 @@
     </div>
     <div class="topBar2">
       <div class="buttons">
+
+        <div class="functionButtons" id="zoomToExtentBtn">
+          <img src="../../../public/iconsa/Ruler.png" alt="Icon" onclick="sidebarOpen()">
+          <span class="toolTip">Sidebar</span>
+        </div>
+
+        <div class="functionButtons" id="zoomToExtentBtn">
+          <img src="../../../public/iconsa/Fit to Frame.png" alt="Icon">
+          <span class="toolTip">Zoom To Fit</span>
+        </div>
+
+        
         <!-- <label for=""></label>
         <i class="fa-solid fa-bars"></i> -->
         <label for="file-input" class="functionButtons">
@@ -85,18 +142,55 @@
   <script>
     function toggleDarkMode() {
       const darkModeCheckbox = document.getElementById('dark-mode');
+      
       const body = document.body;
 
       if (darkModeCheckbox.checked) {
         // Enable dark mode
         body.classList.add('dark-mode');
-        console.log("darkmode")
+        console.log("darkmode");
       } else {
         // Disable dark mode
+      
         body.classList.remove('dark-mode');
-        console.log("darkmode removed")
+        console.log("darkmode removed");
       }
     }
+
+    function sideBarClose(){
+      const sidebarBody = document.getElementById('sidebarBody');
+      sidebarBody.classList.remove('open');
+      sidebarBody.classList.add('close');
+    }
+
+    function sidebarOpen(){
+      const sidebarBody = document.getElementById('sidebarBody');
+      sidebarBody.classList.add('open');
+      sidebarBody.classList.remove('close');
+    }
+
+    function dropdownActive() {
+      var dropdowns = document.getElementsByClassName('dropdownContainer');
+      var SB = document.getElementById('sidebarBody');
+
+      // Loop through all elements with the class 'dropdownContainer'
+      for (var i = 0; i < dropdowns.length; i++) {
+        var dropdown = dropdowns[i];
+      }
+      for (var i = 0; i < SB.length; i++) {
+        var SB = SB[i];
+      }
+
+        // Toggle the 'active' class on each element
+        if (dropdown.classList.contains('active')) {
+          dropdown.classList.remove('active');
+        } else {
+          dropdown.classList.add('active');
+
+        }
+      }
+    
+
   </script>
 </body>
 
