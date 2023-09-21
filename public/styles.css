@@ -1,6 +1,6 @@
 :root {
   --darkmodeColor1: #2a2b2e;
-  --darkmodeColor2: #4e4f53;
+  --darkmodeColor2: #6a6a6f;
   --lightmodeColor1: #cfd8dc;
   --lightmodeColor2: #E7EBED;
 }
@@ -29,6 +29,9 @@ body {
 }
 
 .viewer{
+  position: relative;
+  width: 100vw;
+  height: calc(100vh - 88px);
   transition: background-color 0.2s ease;
   background-color: var(--lightmodeColor1);
 }
@@ -45,6 +48,7 @@ body {
   background-color: #333333;
   opacity: 50%;
   transition: opacity 0.75s, visibility 0.75s;
+  text-align: center;
 }
 
 .loader--hidden {
@@ -62,6 +66,14 @@ body {
   animation: loading 0.75s ease infinite;
 }
 
+.loadingtext {
+  position: absolute;
+  text-align: center;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  color: white;
+  font-weight: bold;
+}
+
 @keyframes loading {
   from {
     transform: rotate(0turn);
@@ -71,10 +83,38 @@ body {
   }
 }
 
-.three-canvas {
-  top: 0;
-  left: 0;
+/* .progressBarText{
+  margin: auto;
+  height: auto;
+  font-size: smaller;
+  
+} */
+
+.progressBar {
+  display: flex;
+  visibility: hidden;
+  position: absolute;
+  margin: 5px;
+  right: 0;
+  text-align: center;
+  height: 8px;
+  width: 15%; /* Adjust the width as needed */
+  border: 2px solid var(--darkmodeColor2);
+  border-radius: 15px;
+  overflow: hidden;
+  transition: visibility 0.3s ease; /* Smooth transition for width changes */    
 }
+
+.progressBar .color {
+  position: absolute;
+  background-color: #045033;
+  width: 0px;
+  height: 100%;
+  border-radius: 15px;
+  transition: width 0.3s ease; /* Smooth transition for width changes */
+}
+
+
 
 .topBar2 {
   display: flex;
@@ -128,6 +168,7 @@ transition: background-color 0.2s ease;
   border-radius: 6px;
   color: #ffffff;
   visibility: hidden;
+  z-index: 999999999;
 }
 
 .topbar {
@@ -177,7 +218,7 @@ transition: background-color 0.2s ease;
 }
 
 .Logo {
-  height: 50px;
+  height: 38px;
   padding: 0px;
 }
 
@@ -193,9 +234,10 @@ transition: background-color 0.2s ease;
 }
 
 .three-canvas {
+  top: 0;
+  left: 0;
   position: sticky;
   align-items: center;
-  z-index: 1;
 }
 
 .icons {
@@ -232,7 +274,19 @@ transition: background-color 0.2s ease;
 }
 
 .copyright {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-weight: bold;
+  font-style: italic;
   position: absolute;
+  color: var(--darkmodeColor1);
+  bottom: 0px;
+  left: 50%;
+  transform: translate(-50%, -2px);
+  transition: background-color 0.2s ease;
+}
+
+.dark-mode .copyright {
+  color: var(--lightmodeColor2);
 }
 
 .fileInputLogo {
@@ -266,7 +320,7 @@ transition: background-color 0.2s ease;
   border-radius: 100px;
   top: 2.5px;
   left: 10%;
-  transition: 0.5s;
+  transition: 0.2s;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -278,7 +332,7 @@ input:checked ~ label:after {
 
 input:checked ~ label {
   background: #242424;
-  transition: background-color 0.5s ease;
+  transition: background-color 0.2s ease;
 }
 
 #dark-mode {
@@ -287,12 +341,12 @@ input:checked ~ label {
 
 .dark-mode .topbar, .dark-mode .viewer{
   background-color: var(--darkmodeColor1);
-  transition: background-color 0.5s ease;
+  transition: background-color 0.2s ease;
 }
 
 .dark-mode .topBar2{
   background-color: var(--darkmodeColor2);
-  transition: background-color 0.5s ease;
+  transition: background-color 0.2s ease;
 }
 
 .dark-mode h4{
