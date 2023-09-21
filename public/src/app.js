@@ -185,7 +185,7 @@ camera.position.x = 8;
 //Creates the lights of the scene
 const lightColor = 0xffffff;
 
-const ambientLight = new AmbientLight(lightColor, 0.5);
+const ambientLight = new AmbientLight(lightColor, 0.5); //Ambient light to light up the whole scene
 scene.add(ambientLight);
 
 const directionalLight = new DirectionalLight(lightColor, 1);
@@ -200,6 +200,8 @@ const renderer = new WebGLRenderer({
   canvas: threeCanvas,
   alpha: true,
 });
+
+//enable local clipping 
 renderer.localClippingEnabled = true;
 
 renderer.setSize(size.width, size.height);
@@ -219,7 +221,7 @@ const controls = new OrbitControls(camera, threeCanvas);
 controls.enableDamping = true;
 // controls.target.set(-2, 0, 0);
 
-// Add Clipping Planes
+// Set Up three axis Clipping Planes
 const x = new THREE.Plane( new THREE.Vector3( 1, 0, 0 ), 0 );
 const y = new THREE.Plane( new THREE.Vector3( 0, - 1, 0 ), 0 );
 const z = new THREE.Plane( new THREE.Vector3( 0, 0, - 1 ), 0 );
@@ -234,21 +236,21 @@ const material = new THREE.MeshBasicMaterial({
   color: 0x00ff00,
   side: THREE.DoubleSide,
   transparent: true,
-  opacity: 0.2
+  opacity: 0.1
 });
 
-// Create a plane mesh
+// Create the meshes for the planes for anchoring
 const xMesh = new THREE.Mesh(geometry, material);
 
-// Align with the plane vector
+// Align the direction of the mesh with the plane vector
 const quaternion = new THREE.Quaternion();
 quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), x.normal);
 xMesh.applyQuaternion(quaternion);
 
+// Add the mesh to the scene
 scene.add(xMesh);
 
-var normal = new THREE.Vector3( 1, 0, 0 );
-
+// Function to anchor the plane to the mesh
 function updateClippingPlane() {
   const position = xMesh.position.clone(); // Get the mesh position
   const rotation = xMesh.rotation.clone(); // Get the mesh rotation
@@ -262,7 +264,7 @@ function updateClippingPlane() {
 const transformControls = new TransformControls(camera, renderer.domElement);
 transformControls.attach(xMesh); // Attach controls to the mesh
 
-
+// Disable Orbit Controls when Transform Controls is active
 transformControls.addEventListener('mouseDown', () => {
   controls.enabled = false; // Disable orbit controls
 });
@@ -272,6 +274,7 @@ transformControls.addEventListener('mouseUp', () => {
   controls.enabled = true; // Re-enable orbit controls
 });
 
+// Fire update clipping plane location
 transformControls.addEventListener("objectChange", () => {
   updateClippingPlane();
   console.log("x constant is:" + x.constant);
@@ -280,18 +283,19 @@ transformControls.addEventListener("objectChange", () => {
 transformControls.setMode('translate');
 transformControls.setSpace('local');
 
+// Temporary solution to unshow axis of the transform controls
 transformControls.showX = false;
 transformControls.showY = false;
 
+// Add the transform Controls to the scene
 scene.add(transformControls);
 
-//Animation loop
+// Animation loop
 const animate = () => {
   controls.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 };
-
 
 animate();
 
@@ -304,7 +308,7 @@ window.addEventListener("resize", () => {
   renderer.setSize(size.width, size.height);
 });
 
-//Initial
+// Initial
 var clipEnabled = false;
 
 // Initial State
@@ -335,6 +339,7 @@ toggleClipButton.addEventListener('click', function () {
   });
 });
 
+//#region setUp IFC loader
 //IFC Loader*****************************************************************************************************************************************
 // Sets up the IFC loader
 const ifcLoader = new IFCLoader();
@@ -382,13 +387,13 @@ function loadIFC(ifcPath, fileName){
 
     scene.add(ifcModel);
 
-
     fitCameraToScene(camera,scene);
 
     //Remove loading screen
     removeLoadingScreen();
   })
 }
+//#endregion
 
 // Get Dom Element
 const progressBar = document.getElementById("progressBar");
