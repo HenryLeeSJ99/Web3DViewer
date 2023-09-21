@@ -375,7 +375,7 @@ input:checked ~ label {
 .dropdownContainer {
   display: flex;
   width: 100%;
-  background-color: #cfd8dc ;
+  background-color: #cfd8dc;
   visibility: hidden;
   position: absolute;
   transform: translateX(0%);
@@ -421,9 +421,17 @@ input:checked ~ label {
   background-color: #e7ebed;
 }
 
+.dark-mode .navLink:hover{
+  background-color: var(--darkmodeColor1);
+}
+
 
 .dropdownContainer ul li a{
   text-decoration: none;
+}
+
+.dark-mode .dropdownContainer ul li a{
+  color: #cfd8dc;
 }
 
 .exitMenu {
