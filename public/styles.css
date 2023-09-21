@@ -354,9 +354,14 @@ input:checked ~ label {
   flex-direction: column;
   z-index: 5;
   align-items: center;
-  background-color: #e7ebed;
+  background-color: #cfd8dc;
   cursor: pointer;
   transition: all .2s ease;
+  
+}
+
+.menu:hover{
+  background-color: #e7ebed;
 }
 
 .dark-mode .menu{
@@ -368,20 +373,25 @@ input:checked ~ label {
 }
 
 .dropdownContainer {
+  display: flex;
   width: 100%;
-  background-color: #cfd8dc;
+  background-color: #cfd8dc ;
   visibility: hidden;
   position: absolute;
   transform: translateX(0%);
   z-index: 2;
   transition: all .2s ease;
+  border-radius: 0px 10px 10px 0px;
+  align-items: center;
+  justify-content: center;
+
 }
 
 .dark-mode .dropdownContainer{
   background-color: var(--darkmodeColor2);
 }
 
-.dropdownContainer.active{
+.open .dropdownContainer.active{
   visibility: visible;
   transform: translateX(100%);
   transition: all .2s ease;
@@ -390,20 +400,31 @@ input:checked ~ label {
 
 
 .dropdownContainer ul {
+  width: 100%;
   display: flex;
   flex-direction: column;
   list-style: none;
   padding: 0;
   margin: 0;
-  align-items: center;
-  justify-content: center;
+  gap: 10px;
+  margin: 10px;
 }
 
 
-.dropdownContainer ul li a {
+.navLink{
+  position: relative;
+  width: 100%;
+  border-radius: 5px;
+}
+
+.navLink:hover{
+  background-color: #e7ebed;
+}
+
+
+.dropdownContainer ul li a{
   text-decoration: none;
 }
-
 
 .exitMenu {
   display: flex;
@@ -421,4 +442,6 @@ input:checked ~ label {
 .dark-mode .exitMenu {
   background-color: var(--darkmodeColor2);
 }
+
+
 
