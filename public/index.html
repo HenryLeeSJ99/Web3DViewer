@@ -19,6 +19,29 @@
   <div id="loading" class="loader loader--hidden">
     <span class="loadingtext">Rendering</span>
   </div>
+  <!-- <div id="popUpSharingBox" class="popUpSharingBox">
+    <div id="sharingBox" class="sharingBox">
+      <span class="sharingBoxTitle">Share Your Model</span>
+      <div id="qrcode" class="qrcode">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Example">
+      </div>
+      <div class="sharingBoxUrl">
+        <span class="sharingBoxDescription">Url</span>
+        <div class="urlHolderBox">
+          <input id="urlHolder" type="text">
+          <button class="button">Copy</button>
+        </div>
+      </div>
+      <div class="iconsHolder">
+        <span class="leftButton">
+          <img src="iconsa/icons8-copy-link-100.png">
+        </span>
+        <span class="rightButton">
+          <img src="iconsa/Model Sharing.png">
+        </span>
+      </div>
+    </div>
+  </div> -->
   <div class="topbar">
     <div class="topbarWrapper">
       <div class="topLeft">
@@ -100,6 +123,7 @@
 
   </div>
   <script src="src/bundle.js"></script>
+  <script src="src/uibox.js"></script>
   <script>
     function toggleDarkMode() {
       const darkModeCheckbox = document.getElementById('dark-mode');

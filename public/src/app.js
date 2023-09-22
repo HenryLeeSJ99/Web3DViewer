@@ -9,6 +9,9 @@ import * as dat from 'dat.gui';
 import { initializeApp } from "firebase/app";
 import { getStorage, ref, listAll, getDownloadURL, getMetadata } from "firebase/storage";
 import * as THREE from 'three';
+import CameraControls from "camera-controls";
+CameraControls.install( { THREE: THREE } );
+import gsap from "gsap";
 
 //#region UI Controller
 function addLoadingScreen(){
@@ -174,6 +177,8 @@ var size = {
   height: (window.innerHeight - 88),
 };
 
+const clock = new THREE.Clock();
+
 //Creates the camera (point of view of the user)
 const aspect = size.width / size.height;
 const camera = new PerspectiveCamera(75, aspect);
@@ -200,6 +205,9 @@ const renderer = new WebGLRenderer({
   canvas: threeCanvas,
   alpha: true,
 });
+
+//Set up camera control
+const cameraControls = new CameraControls( camera, renderer.domElement);
 
 //enable local clipping 
 renderer.localClippingEnabled = true;
@@ -266,12 +274,15 @@ transformControls.attach(xMesh); // Attach controls to the mesh
 
 // Disable Orbit Controls when Transform Controls is active
 transformControls.addEventListener('mouseDown', () => {
+  console.log("MouseDOWN");
   controls.enabled = false; // Disable orbit controls
+  cameraControls.disconnect();
 });
 
 // Event listener for mouseUp event on TransformControls
 transformControls.addEventListener('mouseUp', () => {
   controls.enabled = true; // Re-enable orbit controls
+  cameraControls.connect(renderer.domElement);
 });
 
 // Fire update clipping plane location
@@ -289,12 +300,21 @@ transformControls.showY = false;
 
 // Add the transform Controls to the scene
 scene.add(transformControls);
+renderer.render(scene, camera);
+
 
 // Animation loop
 const animate = () => {
   controls.update();
-  renderer.render(scene, camera);
+  const delta = clock.getDelta();
   requestAnimationFrame(animate);
+
+  cameraControls.update( delta );
+  // if(updated){
+  //   renderer.render( scene, camera );
+  //   console.log( 'rendered' );
+  // }
+  renderer.render( scene, camera );
 };
 
 animate();
@@ -531,10 +551,10 @@ function toggleBoundingBox() {
   if (wireframeBoxHelper) {
     if (isBoundingBoxVisible) {
       scene.remove(wireframeBoxHelper);
-      isBoundingBoxVisible = false;
+      isBoundingBoxVisible = !isBoundingBoxVisible;
   } else {
       scene.add(wireframeBoxHelper);
-      isBoundingBoxVisible = true;
+      isBoundingBoxVisible = !isBoundingBoxVisible;
   }
   } else {
     console.log("no bounding box generated yet");
@@ -549,6 +569,63 @@ fitCameraButton.addEventListener(
   fitCameraToScene();
   console.log("Fit to Scene Button Clicked");}
 );
+
+
+function paddingInCssPixel( model, top, right, bottom, left ) {
+  //Set up bounding box
+  const boundingBox = new THREE.Box3();
+
+  //Iterate through all objects in the scene to calculate the bounding box
+  model.traverse((object) => {
+    if (object.isMesh) {
+      const geometry = object.geometry;
+      geometry.computeBoundingBox();
+      boundingBox.expandByObject(object);
+    }
+  });
+
+  //Get Bounding Box Size
+  const size = boundingBox.getSize( new THREE.Vector3() );
+
+  //Get View port properties
+	const fov = camera.fov * THREE.MathUtils.DEG2RAD;
+	const rendererHeight = renderer.getSize(new THREE.Vector2()).height;
+
+	// const boundingBox = new THREE.Box3().setFromObject( mesh );
+	const boundingWidth  = size.x;
+	const boundingHeight = size.y;
+	const boundingDepth  = size.z;
+
+  // find the distancetoFit
+	var distanceToFit = cameraControls.getDistanceToFitBox( 
+    boundingWidth, boundingHeight, boundingDepth );
+	var paddingTop = 0;
+	var paddingBottom = 0;
+	var paddingLeft = 0;
+	var paddingRight = 0;
+
+	// loop to find almost convergence points
+	for ( var i = 0; i < 10; i ++ ) {
+
+		const depthAt = distanceToFit - boundingDepth * 0.5;
+		const cssPixelToUnit = ( 2 * Math.tan( fov * 0.5 ) * Math.abs( depthAt ) ) / rendererHeight;
+		paddingTop = top * cssPixelToUnit;
+		paddingBottom = bottom * cssPixelToUnit;
+		paddingLeft = left * cssPixelToUnit;
+		paddingRight = right * cssPixelToUnit;
+
+		distanceToFit = cameraControls.getDistanceToFitBox(
+			boundingWidth + paddingLeft + paddingRight,
+			boundingHeight + paddingTop + paddingBottom,
+			boundingDepth
+		);
+
+	}
+
+	cameraControls.fitToBox(model, true, { paddingLeft: paddingLeft, paddingRight: paddingRight, paddingBottom: paddingBottom, paddingTop: paddingTop } );
+
+
+}
 
 function fitCameraToScene() {
   if(ifcLoadedModel.length > 0){
@@ -572,14 +649,21 @@ function fitCameraToScene() {
     
     // Show bounding box
     generateBoundingBox(boundingBox);
-  
-    console.log("Center = " + center);
-  
-    const radius = boundingBox.getSize(new THREE.Vector3()).length() / 2;
-    const distance = radius / Math.tan((Math.PI / 180) * (camera.fov / 2));
     
-    camera.position.set(center.x - distance/3, center.y + distance/3, center.z + distance);
-    camera.lookAt(center);
+    paddingInCssPixel(ifcLoadedModel[0],0,0,0,0);
+    // console.log("Center = " + center);
+    
+    // const size = boundingBox.getSize(new THREE.Vector3());
+
+    // // Reposition the camera
+    // // Calculation start
+    // const maxDim = Math.max(size.x,size.y,size.z);
+    
+    // // const maxDim = boundingBox.getSize(new THREE.Vector3()).length() / 2;
+    // const distance = maxDim / Math.tan((Math.PI / 180) * (camera.fov / 2));
+    
+    // camera.position.set(center.x - distance/3, center.y + distance/3, center.z + distance);
+    // camera.lookAt(center);
     
     // Update Grid
     grid.position.x = center.x;
