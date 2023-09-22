@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "."
+		},
+		{
+			"path": "../../DataAnalytics"
+		},
+		{
+			"path": "../../jsTest"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "public"
+	}
+}
