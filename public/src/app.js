@@ -275,14 +275,14 @@ transformControls.attach(xMesh); // Attach controls to the mesh
 // Disable Orbit Controls when Transform Controls is active
 transformControls.addEventListener('mouseDown', () => {
   console.log("MouseDOWN");
-  controls.enabled = false; // Disable orbit controls
-  cameraControls.disconnect();
+  // controls.enabled = false; // Disable orbit controls
+  cameraControls.enabled = false;
 });
 
 // Event listener for mouseUp event on TransformControls
 transformControls.addEventListener('mouseUp', () => {
-  controls.enabled = true; // Re-enable orbit controls
-  cameraControls.connect(renderer.domElement);
+  // controls.enabled = true; // Re-enable orbit controls
+  cameraControls.enabled = true;
 });
 
 // Fire update clipping plane location
