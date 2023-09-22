@@ -19,6 +19,29 @@
   <div id="loading" class="loader loader--hidden">
     <span class="loadingtext">Rendering</span>
   </div>
+  <!-- <div id="popUpSharingBox" class="popUpSharingBox">
+    <div id="sharingBox" class="sharingBox">
+      <span class="sharingBoxTitle">Share Your Model</span>
+      <div id="qrcode" class="qrcode">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Example">
+      </div>
+      <div class="sharingBoxUrl">
+        <span class="sharingBoxDescription">Url</span>
+        <div class="urlHolderBox">
+          <input id="urlHolder" type="text">
+          <button class="button">Copy</button>
+        </div>
+      </div>
+      <div class="iconsHolder">
+        <span class="leftButton">
+          <img src="iconsa/icons8-copy-link-100.png">
+        </span>
+        <span class="rightButton">
+          <img src="iconsa/Model Sharing.png">
+        </span>
+      </div>
+    </div>
+  </div> -->
   <div class="topbar">
     <div class="topbarWrapper">
       <div class="topLeft">
@@ -26,14 +49,15 @@
         <img class="Logo" src="/iconsa/OctagonLogo.png" alt="">
         <h4>Web3DViewer</h4>
       </div>
-      <div class="ownerDescription">
-        <h4>3D Viewer by H.L.</h4>
+      <div class="topRightButtons">
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfs8jrZhrGabsVc4foupwH1S2kSGgQ0KsWS997_JykgYLAeOg/viewform?usp=sf_link"
+        target="_blank" rel="noopener noreferrer">
+          <img class="functionButtons" src="/iconsa/bug-svgrepo-com.svg"> 
+        </a>
       </div>
     </div>
     <div class="topBar2">
       <div class="buttons">
-        <!-- <label for=""></label>
-        <i class="fa-solid fa-bars"></i> -->
         <label for="file-input" class="functionButtons">
           <img class="fileInputLogo" src="/iconsa/export.png" alt="upload_icon">
           <span class="toolTip">Upload</span>
@@ -99,6 +123,7 @@
 
   </div>
   <script src="src/bundle.js"></script>
+  <script src="src/uibox.js"></script>
   <script>
     function toggleDarkMode() {
       const darkModeCheckbox = document.getElementById('dark-mode');
