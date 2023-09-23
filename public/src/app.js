@@ -1,5 +1,6 @@
 import { AmbientLight, AxesHelper, DirectionalLight, GridHelper, PerspectiveCamera, Scene, WebGLRenderer } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { IFCLoader } from "web-ifc-three/IFCLoader";
 import { Raycaster, Vector2, MeshLambertMaterial } from "three";
 // import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree} from "three-mesh-bvh";
@@ -8,6 +9,9 @@ import * as dat from 'dat.gui';
 import { initializeApp } from "firebase/app";
 import { getStorage, ref, listAll, getDownloadURL, getMetadata } from "firebase/storage";
 import * as THREE from 'three';
+import CameraControls from "camera-controls";
+CameraControls.install( { THREE: THREE } );
+import gsap from "gsap";
 
 //#region UI Controller
 function addLoadingScreen(){
@@ -72,9 +76,6 @@ initializeApp(firebaseConfig);
 //Ref to firebase storage bucket
 const storage = getStorage();
 
-//Initial Model ref
-const initialModelRef = ref(storage, 'IfcModels/sexample.ifc')
-
 // fetch all files in Model folder
 // Create a reference under which you want to list
 //Container to store all models information
@@ -94,7 +95,7 @@ function listAllFiles(folder){
     res.items.forEach((itemRef) => {
       // All the items under listRef.
 
-      // Grade Metadata
+      // Grab Metadata
       getMetadata(itemRef).then((metadata) => {
         modelsKvp.push({ 
           fileName : metadata.name,
@@ -168,7 +169,6 @@ listAndConsoleLog();
 //#region Three Js Viewer
 //Set Up three.js scene*******************************************************************************************************************************
 //Creates the Three.js scene
-
 const scene = new Scene();
 
 //Object to store the size of the viewport
@@ -177,9 +177,12 @@ var size = {
   height: (window.innerHeight - 88),
 };
 
+const clock = new THREE.Clock();
+
 //Creates the camera (point of view of the user)
 const aspect = size.width / size.height;
 const camera = new PerspectiveCamera(75, aspect);
+const orthoCamera = new THREE.OrthographicCamera()
 camera.position.z = 15;
 camera.position.y = 13;
 camera.position.x = 8;
@@ -187,7 +190,7 @@ camera.position.x = 8;
 //Creates the lights of the scene
 const lightColor = 0xffffff;
 
-const ambientLight = new AmbientLight(lightColor, 0.5);
+const ambientLight = new AmbientLight(lightColor, 0.5); //Ambient light to light up the whole scene
 scene.add(ambientLight);
 
 const directionalLight = new DirectionalLight(lightColor, 1);
@@ -202,6 +205,12 @@ const renderer = new WebGLRenderer({
   canvas: threeCanvas,
   alpha: true,
 });
+
+//Set up camera control
+const cameraControls = new CameraControls( camera, renderer.domElement);
+
+//enable local clipping 
+renderer.localClippingEnabled = true;
 
 renderer.setSize(size.width, size.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -220,11 +229,92 @@ const controls = new OrbitControls(camera, threeCanvas);
 controls.enableDamping = true;
 // controls.target.set(-2, 0, 0);
 
-//Animation loop
+// Set Up three axis Clipping Planes
+const x = new THREE.Plane( new THREE.Vector3( 1, 0, 0 ), 0 );
+const y = new THREE.Plane( new THREE.Vector3( 0, - 1, 0 ), 0 );
+const z = new THREE.Plane( new THREE.Vector3( 0, 0, - 1 ), 0 );
+
+const clippingPlanes = [];
+
+clippingPlanes.push(x);
+
+// Clipper Materials
+const geometry = new THREE.PlaneGeometry(10, 10, 32, 32);
+const material = new THREE.MeshBasicMaterial({ 
+  color: 0x00ff00,
+  side: THREE.DoubleSide,
+  transparent: true,
+  opacity: 0.1
+});
+
+// Create the meshes for the planes for anchoring
+const xMesh = new THREE.Mesh(geometry, material);
+
+// Align the direction of the mesh with the plane vector
+const quaternion = new THREE.Quaternion();
+quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), x.normal);
+xMesh.applyQuaternion(quaternion);
+
+// Add the mesh to the scene
+scene.add(xMesh);
+
+// Function to anchor the plane to the mesh
+function updateClippingPlane() {
+  const position = xMesh.position.clone(); // Get the mesh position
+  const rotation = xMesh.rotation.clone(); // Get the mesh rotation
+
+  // Update the clipping plane with the new position and rotation
+  // x.normal.set(1, 0, 0); // Adjust normal based on your needs
+  x.constant = position.dot(x.normal) * -1;
+}
+
+// Add transform Controls
+const transformControls = new TransformControls(camera, renderer.domElement);
+transformControls.attach(xMesh); // Attach controls to the mesh
+
+// Disable Orbit Controls when Transform Controls is active
+transformControls.addEventListener('mouseDown', () => {
+  console.log("MouseDOWN");
+  // controls.enabled = false; // Disable orbit controls
+  cameraControls.enabled = false;
+});
+
+// Event listener for mouseUp event on TransformControls
+transformControls.addEventListener('mouseUp', () => {
+  // controls.enabled = true; // Re-enable orbit controls
+  cameraControls.enabled = true;
+});
+
+// Fire update clipping plane location
+transformControls.addEventListener("objectChange", () => {
+  updateClippingPlane();
+  console.log("x constant is:" + x.constant);
+})
+
+transformControls.setMode('translate');
+transformControls.setSpace('local');
+
+// Temporary solution to unshow axis of the transform controls
+transformControls.showX = false;
+transformControls.showY = false;
+
+// Add the transform Controls to the scene
+scene.add(transformControls);
+renderer.render(scene, camera);
+
+
+// Animation loop
 const animate = () => {
   controls.update();
-  renderer.render(scene, camera);
+  const delta = clock.getDelta();
   requestAnimationFrame(animate);
+
+  cameraControls.update( delta );
+  // if(updated){
+  //   renderer.render( scene, camera );
+  //   console.log( 'rendered' );
+  // }
+  renderer.render( scene, camera );
 };
 
 animate();
@@ -238,7 +328,38 @@ window.addEventListener("resize", () => {
   renderer.setSize(size.width, size.height);
 });
 
+// Initial
+var clipEnabled = false;
 
+// Initial State
+xMesh.visible = false;
+transformControls.enabled = false;
+transformControls.visible = false;
+
+// Toggle button for clipping
+var toggleClipButton = document.getElementById('cutSectionXBtn');
+toggleClipButton.addEventListener('click', function () {
+    clipEnabled = !clipEnabled;
+    xMesh.visible = clipEnabled;
+    transformControls.enabled = clipEnabled;
+    transformControls.visible = clipEnabled;
+
+    ifcLoadedModel[0].traverse((child) => {
+      if (child.isMesh) {
+          child.material.clippingPlanes = clipEnabled ? clippingPlanes : [];
+          child.material.needsUpdate = true;
+
+          if (Array.isArray(child.material)){
+            child.material.forEach((mat) => {
+              console.log(mat);
+              mat.clippingPlanes = clipEnabled ? clippingPlanes : [];
+              mat.needsUpdate = true;
+            })
+      }}
+  });
+});
+
+//#region setUp IFC loader
 //IFC Loader*****************************************************************************************************************************************
 // Sets up the IFC loader
 const ifcLoader = new IFCLoader();
@@ -259,6 +380,20 @@ const ifc = ifcLoader.ifcManager;
 //     await setupAllCategories();
 //   })
 // }
+function getBoundingBox(model){
+  const boundingBox = new THREE.Box3();
+
+  //Iterate through all objects in the scene to calculate the bounding box
+  model.traverse((object) => {
+    if (object.isMesh) {
+      const geometry = object.geometry;
+      geometry.computeBoundingBox();
+      boundingBox.expandByObject(object);
+    }
+  });
+  return boundingBox;
+}
+
 
 function loadIFC(ifcPath, fileName){
   //Add loading screen to UI
@@ -267,19 +402,10 @@ function loadIFC(ifcPath, fileName){
   ifcLoader.load(ifcPath, (ifcModel) => {
 
     scene.remove(ifcLoadedModel[0]);
-
+    
     ifcLoadedModel[0] = ifcModel;
 
     scene.add(ifcModel);
-
-    //translate the model temporary!
-    if(fileName == "SETIA KASIH-BEST-XX-XX-X-V-ARCH-1001_Rev 3.ifc"){
-      ifcLoadedModel[0].translateY(-108);
-      camera.position.x = -17.90435992387824;
-      camera.position.y = 14.065288729517526;
-      camera.position.z = 35.479837665201515;
-
-    }
 
     fitCameraToScene(camera,scene);
 
@@ -287,6 +413,11 @@ function loadIFC(ifcPath, fileName){
     removeLoadingScreen();
   })
 }
+//#endregion
+
+// Get Dom Element
+const progressBar = document.getElementById("progressBar");
+const progress = document.getElementById("progress");
 
 //Load IFC from remote server
 function loadModelWithFileName(fileName){
@@ -299,6 +430,9 @@ function loadModelWithFileName(fileName){
     const xhr = new XMLHttpRequest();
     xhr.responseType = 'blob';
 
+    //Bring Up Progress Bar
+    progressBar.style.visibility = "visible"
+
     //Listen for 'progress' event
     xhr.onprogress = event => {
       // event.loaded returns how many bytes are downloaded
@@ -306,7 +440,7 @@ function loadModelWithFileName(fileName){
       // event.total is only available if server sends `Content-Length` header
       // console.log(`Downloaded ${event.loaded} of ${event.total} bytes`)
 
-      
+      progress.style.width = `${event.loaded/event.total * 100}%`;
       console.log(`Downloaded ${Math.round(event.loaded/event.total) * 100}%`)
     }
 
@@ -315,8 +449,8 @@ function loadModelWithFileName(fileName){
       link = URL.createObjectURL(blob);
 
       //Load IFC file
+      progressBar.style.visibility = "hidden"
       loadIFC(link, fileName);
-
 
     };
     xhr.open('GET', url);
@@ -351,29 +485,43 @@ function loadModelWithFileName(fileName){
 //Load the current model in url
 loadModelWithFileName(getUrlModelParam());
 
-// Load ifc file from local
-
-
-// loadIFC("/example.ifc");
-
 
 // Load ifc file from input button
 const input = document.getElementById("file-input");
 input.addEventListener(
   "change",
   (changed) => {
-    addLoadingScreen();
+    //References to input file
     const file = changed.target.files[0];
-    var ifcURL = URL.createObjectURL(file);
 
-    //Load IFC
-    loadIFC(ifcURL);
+    //Accepted file type
+    const acceptedTypes = ['.ifc', '.ifczip', '.ifcxml']; // Define IFC file extensions here
+
+    // Get the file extension
+    const fileExtension = file.name.toLowerCase().slice((file.name.lastIndexOf(".") - 1 >>> 0) + 2);
+
+    if (acceptedTypes.includes('.' + fileExtension)) {
+      // Proceed with further actions for IFC files here
+      var ifcURL = URL.createObjectURL(file);
+
+      //Load IFC
+      loadIFC(ifcURL);
+
+
+    } else {
+      alert('File is not an IFC file. Please choose an IFC file.');
+    }
   },
   false
 );
 
+//State for Bounding box
+var isBoundingBoxVisible = false;
+var wireframeBoxHelper;
+
 //Show the bounding box of the element
-function showBoundingBox(boundingBox){
+function generateBoundingBox(boundingBox){
+
   // Create a wireframe material
   const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
   // Calculate dimensions and center of the bounding box
@@ -386,65 +534,200 @@ function showBoundingBox(boundingBox){
 
   wireframeBox.position.copy(boxCenter);
 
-  // Add the wireframe box to the scene
-  scene.add(wireframeBox);
+  wireframeBoxHelper = wireframeBox;
 
   renderer.render(scene, camera); 
 }
 
-// Get Fit Camera Button
+const boundingBoxButton = document.getElementById("boundingBoxBtn");
+boundingBoxButton.addEventListener(
+  "click",
+  () => {
+  toggleBoundingBox();
+  console.log("Toggle BoundingBox Button Clicked");}
+);
+
+function toggleBoundingBox() {
+  if (wireframeBoxHelper) {
+    if (isBoundingBoxVisible) {
+      scene.remove(wireframeBoxHelper);
+      isBoundingBoxVisible = !isBoundingBoxVisible;
+  } else {
+      scene.add(wireframeBoxHelper);
+      isBoundingBoxVisible = !isBoundingBoxVisible;
+  }
+  } else {
+    console.log("no bounding box generated yet");
+  }
+}
+
+//Get Fit Camera Button
 const fitCameraButton = document.getElementById("zoomToExtentBtn");
 fitCameraButton.addEventListener(
   "click",
   () => {
   fitCameraToScene();
-  console.log("Fit to Scene Buttons Clicked");}
+  console.log("Fit to Scene Button Clicked");}
 );
+
+
+function paddingInCssPixel( model, top, right, bottom, left ) {
+  //Set up bounding box
+  const boundingBox = new THREE.Box3();
+
+  //Iterate through all objects in the scene to calculate the bounding box
+  model.traverse((object) => {
+    if (object.isMesh) {
+      const geometry = object.geometry;
+      geometry.computeBoundingBox();
+      boundingBox.expandByObject(object);
+    }
+  });
+
+  //Get Bounding Box Size
+  const size = boundingBox.getSize( new THREE.Vector3() );
+
+  //Get View port properties
+	const fov = camera.fov * THREE.MathUtils.DEG2RAD;
+	const rendererHeight = renderer.getSize(new THREE.Vector2()).height;
+
+	// const boundingBox = new THREE.Box3().setFromObject( mesh );
+	const boundingWidth  = size.x;
+	const boundingHeight = size.y;
+	const boundingDepth  = size.z;
+
+  // find the distancetoFit
+	var distanceToFit = cameraControls.getDistanceToFitBox( 
+    boundingWidth, boundingHeight, boundingDepth );
+	var paddingTop = 0;
+	var paddingBottom = 0;
+	var paddingLeft = 0;
+	var paddingRight = 0;
+
+	// loop to find almost convergence points
+	for ( var i = 0; i < 10; i ++ ) {
+
+		const depthAt = distanceToFit - boundingDepth * 0.5;
+		const cssPixelToUnit = ( 2 * Math.tan( fov * 0.5 ) * Math.abs( depthAt ) ) / rendererHeight;
+		paddingTop = top * cssPixelToUnit;
+		paddingBottom = bottom * cssPixelToUnit;
+		paddingLeft = left * cssPixelToUnit;
+		paddingRight = right * cssPixelToUnit;
+
+		distanceToFit = cameraControls.getDistanceToFitBox(
+			boundingWidth + paddingLeft + paddingRight,
+			boundingHeight + paddingTop + paddingBottom,
+			boundingDepth
+		);
+
+	}
+
+	cameraControls.fitToBox(model, true, { paddingLeft: paddingLeft, paddingRight: paddingRight, paddingBottom: paddingBottom, paddingTop: paddingTop } );
+
+
+}
 
 function fitCameraToScene() {
   if(ifcLoadedModel.length > 0){
     const boundingBox = new THREE.Box3();
 
-    // Iterate through all objects in the scene to calculate the bounding box
-    scene.traverse((object) => {
+    //Get Bounding Box Size
+    const boundingBoxSize = new THREE.Vector3();
+
+    //Iterate through all objects in the scene to calculate the bounding box
+    ifcLoadedModel[0].traverse((object) => {
       if (object.isMesh) {
         const geometry = object.geometry;
         geometry.computeBoundingBox();
         boundingBox.expandByObject(object);
       }
     });
-  
+
     const center = new THREE.Vector3();
+    
     boundingBox.getCenter(center);
-  
+    
     // Show bounding box
-    showBoundingBox(boundingBox);
-  
-    console.log("Center = " + center);
-  
-    const radius = boundingBox.getSize(new THREE.Vector3()).length() / 2;
-    const distance = radius / Math.tan((Math.PI / 180) * (camera.fov / 2));
-  
-    camera.position.set(center.x - distance/3, center.y + distance/3, center.z + distance);
-    camera.lookAt(center);
-  
+    generateBoundingBox(boundingBox);
+    
+    paddingInCssPixel(ifcLoadedModel[0],0,0,0,0);
+    // console.log("Center = " + center);
+    
+    // const size = boundingBox.getSize(new THREE.Vector3());
+
+    // // Reposition the camera
+    // // Calculation start
+    // const maxDim = Math.max(size.x,size.y,size.z);
+    
+    // // const maxDim = boundingBox.getSize(new THREE.Vector3()).length() / 2;
+    // const distance = maxDim / Math.tan((Math.PI / 180) * (camera.fov / 2));
+    
+    // camera.position.set(center.x - distance/3, center.y + distance/3, center.z + distance);
+    // camera.lookAt(center);
+    
+    // Update Grid
+    grid.position.x = center.x;
+    grid.position.y = center.y - boundingBox.getSize(boundingBoxSize).y/2;
+    grid.position.z = center.z;
+    
+    // Update clipping plane
+    xMesh.position.x = center.x;
+    xMesh.position.y = center.y;
+    xMesh.position.z = center.z;
+
+    updateClippingPlane();
+
     // Update Controls
     controls.target.set(center.x, center.y, center.z)
     controls.update();
   
     camera.updateProjectionMatrix();
     renderer.render(scene, camera); 
+
   }
   else{
     console.log("No Model has been loaded");
   }
 }
 
+// //Set Up Clipping Planes
+// function setUpClippingPlanes(dir,ifcModel){
+
+//   const x = new THREE.Plane( new THREE.Vector3( 1, 0, 0 ), 0 );
+//   const y = new THREE.Plane( new THREE.Vector3( 0, - 1, 0 ), 0 );
+//   const z = new THREE.Plane( new THREE.Vector3( 0, 0, - 1 ), 0 );
+  
+//   const helpers = new THREE.Group();
+//   helpers.add( new THREE.PlaneHelper( clipPlanes[ 0 ], 50 , 0xff0000 ) );
+//   helpers.add( new THREE.PlaneHelper( clipPlanes[ 1 ], 50 , 0x00ff00 ) );
+//   helpers.add( new THREE.PlaneHelper( clipPlanes[ 2 ], 50 , 0x0000ff ) );
+//   helpers.visible = true;
+//   scene.add( helpers );
+  
+
+// }
 
 
+//    // Initialize TransformControls
+//   const transformControls = new TransformControls(camera, renderer.domElement);
+//   transformControls.attach(ifcLoadedModel[0]);
 
+//   transformControls.addEventListener('mouseDown', () => {
+//     controls.enabled = false; // Disable orbit controls
+//   });
+  
+//   // Event listener for mouseUp event on TransformControls
+//   transformControls.addEventListener('mouseUp', () => {
+//     controls.enabled = true; // Re-enable orbit controls
+//   });
 
-
+//   scene.add(transformControls);
+// // Toggle button for clipping
+// var toggleClipButton = document.getElementById('rulerBtn');
+// toggleClipButton.addEventListener('click', function () {
+//     clipEnabled = !clipEnabled;
+//     applyClipping();
+// });
 
 
 
@@ -499,12 +782,14 @@ function fitCameraToScene() {
 //   const found = cast(event)[0];
 //   if (found) {
 //     // Gets model ID
-//     model.id = found.object.modelID;
+//     modelID = found.object.modelID;
 
 //     // Gets Express ID
 //     const index = found.faceIndex;
 //     const geometry = found.object.geometry;
 //     const id = ifc.getExpressId(geometry, index);
+//     const props = ifc.getItemProperties(modelID, id);
+//     console.log("props",props,"id",id,'index',index )
 
 //     // Creates subset
 //     ifcLoader.ifcManager.createSubset({
@@ -520,58 +805,10 @@ function fitCameraToScene() {
 //   }
 // }
 
-// window.onmousemove = (event) => highlight(event, preselectMat, ifcLoadedModel);
+// window.onmousedown = (event) => highlight(event, preselectMat, ifcLoadedModel);
 
 
 
-// // ***** Clipping planes: *****
-// const gui = new dat.GUI();
-// const localPlane = new THREE.Plane( new THREE.Vector3( 0, - 1, 0 ), 0.8 );
-
-// // ***** Clipping setup (renderer): *****
-// renderer.localClippingEnabled = true;
-// folderLocal = gui.addFolder( 'Local Clipping' ),
-// propsLocal = {
-
-//   get 'Enabled'() {
-
-//     return renderer.localClippingEnabled;
-
-//   },
-//   set 'Enabled'( v ) {
-
-//     renderer.localClippingEnabled = v;
-
-//   },
-
-//   get 'Shadows'() {
-
-//     return material.clipShadows;
-
-//   },
-//   set 'Shadows'( v ) {
-
-//     material.clipShadows = v;
-
-//   },
-
-//   get 'Plane'() {
-
-//     return localPlane.constant;
-
-//   },
-//   set 'Plane'( v ) {
-
-//     localPlane.constant = v;
-
-//   }
-
-// }
-// folderLocal.add( propsLocal, 'Enabled' );
-// folderLocal.add( propsLocal, 'Shadows' );
-// folderLocal.add( propsLocal, 'Plane', 0.3, 1.25 );
-
-//#endregion
 /* // Create a function for the Raycaster to cast rays, calculating the position of the mouse on the screen
 
 

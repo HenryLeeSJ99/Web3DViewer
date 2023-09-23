@@ -1,6 +1,6 @@
 :root {
   --darkmodeColor1: #2a2b2e;
-  --darkmodeColor2: #4e4f53;
+  --darkmodeColor2: #6a6a6f;
   --lightmodeColor1: #cfd8dc;
   --lightmodeColor2: #e7ebed;
 }
@@ -29,8 +29,12 @@ body {
 }
 
 .viewer {
+  position: relative;
+  width: 100vw;
+  height: calc(100vh - 88px);
   transition: background-color 0.2s ease;
   background-color: var(--lightmodeColor1);
+  z-index: 0;
 }
 
 .loader {
@@ -43,8 +47,10 @@ body {
   align-items: center;
   justify-content: center;
   background-color: #333333;
-  opacity: 50%;
+  opacity: 30%;
   transition: opacity 0.75s, visibility 0.75s;
+  text-align: center;
+  z-index: 1;
 }
 
 .loader--hidden {
@@ -62,6 +68,14 @@ body {
   animation: loading 0.75s ease infinite;
 }
 
+.loadingtext {
+  position: absolute;
+  text-align: center;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  color: white;
+  font-weight: bold;
+}
+
 @keyframes loading {
   from {
     transform: rotate(0turn);
@@ -71,10 +85,162 @@ body {
   }
 }
 
-.three-canvas {
+.popUpSharingBox {
+  align-items: center;
+  position: fixed;
   top: 0;
   left: 0;
+  width: 100vw;
+  height: 100vh;
+  /* background-color: var(--darkmodeColor1); */
+  z-index: 3;
+  transition: opacity 0.3s ease;
+  /* visibility: hidden; */
 }
+
+:root { 
+  --dialogBoxWidth : 300px;
+  --dialogBoxHeight : 400px;
+}
+
+.sharingBox {
+  padding: 30px;
+  align-content: center;
+  position: relative;
+  left: calc(50% - var(--dialogBoxWidth)/2 - 30px);
+  top:  calc(50% - var(--dialogBoxHeight)/2 - 30px);
+  height: var(--dialogBoxHeight);
+  width: var(--dialogBoxWidth);
+  background-color: #E7EBED;
+  border-radius: 15px;
+}
+
+.urlHolderBox{
+  display: flex;
+}
+
+.qrcode {
+  display: flex;
+  width: 200px;
+  border-radius: 5px;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  margin: 10px auto;
+  overflow: hidden;
+  border: 1px solid  #d1d1d1;
+}
+
+.qrcode img {
+  height: auto;
+  width: auto;
+  margin: 10px;
+}
+
+.iconsHolder {
+  height: fit-content;
+  display: flex;
+  justify-content:space-around;
+  width: 100%;
+}
+
+.iconsHolder .leftButton, .iconsHolder .rightButton {
+  box-shadow: 0 0 2px darkslategray;
+  background-color: white;
+  border-radius: 70%;
+  padding: 10px;
+  margin: 10px;
+  cursor: pointer;
+}
+
+.iconsHolder .leftButton:hover, .iconsHolder .rightButton:hover {
+  background-color: var(--lightmodeColor1);
+}
+
+.iconsHolder img{
+  padding:0px;
+  height: 50px;
+  width: 50px;
+}
+
+.urlHolderBox button{
+  cursor: pointer;
+  border-radius: 5px;
+  margin-left: 10px;
+  text-align: center;
+  background-color: var(--darkmodeColor2);
+  border: solid;
+  height: 53.6px;
+  padding: 10px;
+  color: white;
+}
+.urlHolderBox button:hover{
+  transition: background-color 0.3s ease;
+  transition: color 0.3s ease;
+  background-color: var(--lightmodeColor1);
+  color: var(--darkmodeColor1);
+}
+
+.sharingBoxUrl{
+  display: flex;
+  flex-direction: column;
+}
+
+.sharingBoxUrl input{
+  width: 100%;
+  height: 50px;
+  border: 1px solid #494eea;
+  outline: 0;
+  border-radius: 5px;
+}
+.sharingBoxTitle{
+  font-size: 30px;
+  font-weight: bold;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  position: relative;
+  margin: 10px;
+}
+
+.sharingBoxDescription{
+  font-size: 24px;
+  font-weight: bold;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  position: relative;
+  margin: 10px;
+}
+/* .progressBarText{
+  margin: auto;
+  height: auto;
+  font-size: smaller;
+  
+} */
+
+.progressBar {
+  display: flex;
+  visibility: hidden;
+  position: absolute;
+  margin: 5px;
+  right: 0;
+  text-align: center;
+  height: 8px;
+  width: 15%; /* Adjust the width as needed */
+  border: 2px solid var(--darkmodeColor2);
+  border-radius: 15px;
+  overflow: hidden;
+  transition: visibility 0.3s ease; /* Smooth transition for width changes */
+  z-index: 1; 
+}
+
+.progressBar .color {
+  position: absolute;
+  background-color: #045033;
+  width: 0px;
+  height: 100%;
+  border-radius: 15px;
+  transition: width 0.3s ease; /* Smooth transition for width changes */
+}
+
+
 
 .topBar2 {
   display: flex;
@@ -128,6 +294,7 @@ input[type="file"] {
   border-radius: 6px;
   color: #ffffff;
   visibility: hidden;
+  z-index: 999999999;
 }
 
 .topbar {
@@ -177,15 +344,21 @@ input[type="file"] {
 }
 
 .Logo {
-  height: 50px;
+  height: 38px;
   padding: 0px;
 }
 
-.ownerDescription {
+.topRightButtons {
+  align-items: center;
+  display: flex;
   margin: 0px;
   padding: 0px;
 }
 
+.topRightButtons .functionButtons{
+  height: 25px;
+  width: 25x;
+}
 .container {
   background-color: #2a2b2e;
   display: flex;
@@ -193,6 +366,8 @@ input[type="file"] {
 }
 
 .three-canvas {
+  top: 0;
+  left: 0;
   position: sticky;
   align-items: center;
 }
@@ -231,7 +406,19 @@ input[type="file"] {
 }
 
 .copyright {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-weight: bold;
+  font-style: italic;
   position: absolute;
+  color: var(--darkmodeColor1);
+  bottom: 0px;
+  left: 50%;
+  transform: translate(-50%, -2px);
+  transition: background-color 0.2s ease;
+}
+
+.dark-mode .copyright {
+  color: var(--lightmodeColor2);
 }
 
 .fileInputLogo {
@@ -265,7 +452,7 @@ input[type="file"] {
   border-radius: 100px;
   top: 2.5px;
   left: 10%;
-  transition: 0.5s;
+  transition: 0.2s;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
 
@@ -277,7 +464,7 @@ input:checked ~ label:after {
 
 input:checked ~ label {
   background: #242424;
-  transition: background-color 0.5s ease;
+  transition: background-color 0.2s ease;
 }
 
 #dark-mode {
@@ -287,12 +474,12 @@ input:checked ~ label {
 .dark-mode .topbar,
 .dark-mode .viewer {
   background-color: var(--darkmodeColor1);
-  transition: background-color 0.5s ease;
+  transition: background-color 0.2s ease;
 }
 
 .dark-mode .topBar2 {
   background-color: var(--darkmodeColor2);
-  transition: background-color 0.5s ease;
+  transition: background-color 0.2s ease;
 }
 
 .dark-mode h4, .dark-mode h3 {
