@@ -240,8 +240,6 @@ const x = new THREE.Plane( new THREE.Vector3( 1, 0, 0 ), 0 );
 const y = new THREE.Plane( new THREE.Vector3( 0, - 1, 0 ), 0 );
 const z = new THREE.Plane( new THREE.Vector3( 0, 0, - 1 ), 0 );
 
-const clippingPlanes = [];
-
 // Clipper Materials
 const geometryX = new THREE.PlaneGeometry(10, 10, 32, 32);
 const clipMaterialX = new THREE.MeshBasicMaterial({ 
@@ -275,11 +273,6 @@ const clipMaterialZ = new THREE.MeshBasicMaterial({
 
 // Create the meshes for the planes for anchoring
 const zMesh = new THREE.Mesh(geometryZ, clipMaterialZ);
-
-// Initial
-clippingPlanes.push(x);
-clippingPlanes.push(y);
-clippingPlanes.push(z);
 
 
 // Align the direction of the mesh with the plane vector
@@ -403,69 +396,79 @@ window.addEventListener("resize", () => {
   camera.updateProjectionMatrix();
   renderer.setSize(size.width, size.height);
 });
+// Container to store all the clipping planes
+const clippingPlanes = [];
 
-// InitialClip
-var clipX = false;
-var clipZ = false;
-var clipY = false;
+// Initial clipping status
+const clippingStatus = {
+  clipX: false,
+  clipY: false,
+  clipZ: false,
+};
 
-// Toggle button for clipping in x axis
-var toggleClipXButton = document.getElementById('cutSectionXBtn');
-toggleClipXButton.addEventListener('click', function () {
-    clipX = !clipX;
-    xMesh.visible = clipX;
-    yMesh.visible = clipX;
-    zMesh.visible = clipX;
-    transformControlsX.enabled = clipX;
-    transformControlsX.visible = clipX;
-    transformControlsY.enabled = clipX;
-    transformControlsY.visible = clipX;
-    transformControlsZ.enabled = clipX;
-    transformControlsZ.visible = clipX;
+// Function to toggle clipping for a given axis
+function toggleClipping(axis) {
+  // Toggle the clipping status for the specified axis
+  clippingStatus[axis] = !clippingStatus[axis];
 
-    ifcLoadedModel[0].traverse((child) => {
-      if (child.isMesh) {
-          child.material.clippingPlanes = clipX ? clippingPlanes : [];
-          child.material.needsUpdate = true;
+  // Update the clippingPlanes array based on the current clipping status
+  clippingPlanes.length = 0; // Clear the array
+  if (clippingStatus.clipX) {
+    clippingPlanes.push(x);
+  }
+  if (clippingStatus.clipY) {
+    clippingPlanes.push(y);
+  }
+  if (clippingStatus.clipZ) {
+    clippingPlanes.push(z);
+  }
 
-          if (Array.isArray(child.material)){
-            child.material.forEach((mat) => {
-              console.log(mat);
-              mat.clippingPlanes = clipX ? clippingPlanes : [];
-              mat.needsUpdate = true;
-            })
-      }}
+  // Set visibility and transform controls for all axes
+  xMesh.visible = clippingStatus.clipX;
+  yMesh.visible = clippingStatus.clipY;
+  zMesh.visible = clippingStatus.clipZ;
+
+  transformControlsX.enabled = clippingStatus.clipX;
+  transformControlsX.visible = clippingStatus.clipX;
+  transformControlsY.enabled = clippingStatus.clipY;
+  transformControlsY.visible = clippingStatus.clipY;
+  transformControlsZ.enabled = clippingStatus.clipZ;
+  transformControlsZ.visible = clippingStatus.clipZ;
+
+  // Apply clipping planes to child meshes
+  ifcLoadedModel[0].traverse((child) => {
+    if (child.isMesh) {
+      child.material.clippingPlanes = clippingPlanes;
+      child.material.needsUpdate = true;
+
+      if (Array.isArray(child.material)) {
+        child.material.forEach((mat) => {
+          mat.clippingPlanes = clippingPlanes;
+          mat.needsUpdate = true;
+        });
+      }
+    }
   });
+}
+
+// Toggle button for clipping in X axis
+const toggleClipXButton = document.getElementById('cutSectionXBtn');
+toggleClipXButton.addEventListener('click', () => {
+  toggleClipping('clipX');
 });
 
-// Toggle button for clipping
-var toggleClipYButton = document.getElementById('cutSectionYBtn');
-toggleClipYButton.addEventListener('click', function () {
-    clipY = !clipY;
-    xMesh.visible = clipY;
-    yMesh.visible = clipY;
-    zMesh.visible = clipY;
-    transformControlsX.enabled = clipY;
-    transformControlsX.visible = clipY;
-    transformControlsY.enabled = clipY;
-    transformControlsY.visible = clipY;
-    transformControlsZ.enabled = clipY;
-    transformControlsZ.visible = clipY;
-
-    ifcLoadedModel[0].traverse((child) => {
-      if (child.isMesh) {
-          child.material.clippingPlanes = clipY ? clippingPlanes : [];
-          child.material.needsUpdate = true;
-
-          if (Array.isArray(child.material)){
-            child.material.forEach((mat) => {
-              console.log(mat);
-              mat.clippingPlanes = clipY ? clippingPlanes : [];
-              mat.needsUpdate = true;
-            })
-      }}
-  });
+// Toggle button for clipping in Y axis
+const toggleClipYButton = document.getElementById('cutSectionYBtn');
+toggleClipYButton.addEventListener('click', () => {
+  toggleClipping('clipY');
 });
+
+// Toggle button for clipping in Z axis
+const toggleClipZButton = document.getElementById('cutSectionZBtn');
+toggleClipZButton.addEventListener('click', () => {
+  toggleClipping('clipZ');
+});
+
 
 //#region setUp IFC loader
 //IFC Loader*****************************************************************************************************************************************
