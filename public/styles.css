@@ -240,7 +240,9 @@ body {
   transition: width 0.3s ease; /* Smooth transition for width changes */
 }
 
-
+.topRightContainer {
+  display: flex;
+}
 
 .topBar2 {
   display: flex;

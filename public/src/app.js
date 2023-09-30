@@ -182,7 +182,12 @@ const clock = new THREE.Clock();
 //Creates the camera (point of view of the user)
 const aspect = size.width / size.height;
 const camera = new PerspectiveCamera(75, aspect);
-const orthoCamera = new THREE.OrthographicCamera()
+const orthoCamera = new THREE.OrthographicCamera( size.width / - 200, size.width / 200, size.height / 200, size.height / - 200, 1, 1000)
+
+//Current active camera {default is perspective}
+var activeCamera = camera;
+
+//Initial camera position
 camera.position.z = 15;
 camera.position.y = 13;
 camera.position.x = 8;
@@ -206,8 +211,9 @@ const renderer = new WebGLRenderer({
   alpha: true,
 });
 
+
 //Set up camera control
-const cameraControls = new CameraControls( camera, renderer.domElement);
+const cameraControls = new CameraControls(camera, renderer.domElement);
 
 //enable local clipping 
 renderer.localClippingEnabled = true;
@@ -236,11 +242,9 @@ const z = new THREE.Plane( new THREE.Vector3( 0, 0, - 1 ), 0 );
 
 const clippingPlanes = [];
 
-clippingPlanes.push(x);
-
 // Clipper Materials
-const geometry = new THREE.PlaneGeometry(10, 10, 32, 32);
-const material = new THREE.MeshBasicMaterial({ 
+const geometryX = new THREE.PlaneGeometry(10, 10, 32, 32);
+const clipMaterialX = new THREE.MeshBasicMaterial({ 
   color: 0x00ff00,
   side: THREE.DoubleSide,
   transparent: true,
@@ -248,60 +252,135 @@ const material = new THREE.MeshBasicMaterial({
 });
 
 // Create the meshes for the planes for anchoring
-const xMesh = new THREE.Mesh(geometry, material);
+const xMesh = new THREE.Mesh(geometryX, clipMaterialX);
+
+const geometryY = new THREE.PlaneGeometry(10, 10, 32, 32);
+const clipMaterialY = new THREE.MeshBasicMaterial({ 
+  color: 0x00ff00,
+  side: THREE.DoubleSide,
+  transparent: true,
+  opacity: 0.1
+});
+
+// Create the meshes for the planes for anchoring
+const yMesh = new THREE.Mesh(geometryY, clipMaterialY);
+
+const geometryZ = new THREE.PlaneGeometry(10, 10, 32, 32);
+const clipMaterialZ = new THREE.MeshBasicMaterial({ 
+  color: 0x00ff00,
+  side: THREE.DoubleSide,
+  transparent: true,
+  opacity: 0.1
+});
+
+// Create the meshes for the planes for anchoring
+const zMesh = new THREE.Mesh(geometryZ, clipMaterialZ);
+
+// Initial
+clippingPlanes.push(x);
+clippingPlanes.push(y);
+clippingPlanes.push(z);
+
 
 // Align the direction of the mesh with the plane vector
-const quaternion = new THREE.Quaternion();
-quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), x.normal);
-xMesh.applyQuaternion(quaternion);
+const quaternionX = new THREE.Quaternion();
+quaternionX.setFromUnitVectors(new THREE.Vector3(0, 0, 1), x.normal);
+xMesh.applyQuaternion(quaternionX);
+
+const quaternionY = new THREE.Quaternion();
+quaternionY.setFromUnitVectors(new THREE.Vector3(0, 0, 1), y.normal);
+yMesh.applyQuaternion(quaternionY);
+
+const quaternionZ = new THREE.Quaternion();
+quaternionZ.setFromUnitVectors(new THREE.Vector3(0, 0, 1), z.normal);
+zMesh.applyQuaternion(quaternionZ);
 
 // Add the mesh to the scene
 scene.add(xMesh);
+scene.add(yMesh);
+scene.add(zMesh);
 
 // Function to anchor the plane to the mesh
 function updateClippingPlane() {
-  const position = xMesh.position.clone(); // Get the mesh position
-  const rotation = xMesh.rotation.clone(); // Get the mesh rotation
+  const positionX = xMesh.position.clone(); // Get the mesh position
+  const positionZ = zMesh.position.clone(); // Get the mesh position
+  const positionY = yMesh.position.clone(); // Get the mesh position
 
   // Update the clipping plane with the new position and rotation
   // x.normal.set(1, 0, 0); // Adjust normal based on your needs
-  x.constant = position.dot(x.normal) * -1;
+  x.constant = positionX.dot(x.normal) * -1;
+  z.constant = positionZ.dot(z.normal) * -1;
+  y.constant = positionY.dot(y.normal) * -1;
 }
 
-// Add transform Controls
-const transformControls = new TransformControls(camera, renderer.domElement);
-transformControls.attach(xMesh); // Attach controls to the mesh
+// Function to handle mouse events (toggle camera controls)
+function handleMouseEvent(e) {
+  console.log("Mouse event: " + e.type);
+  cameraControls.enabled = e.type === "mouseUp";
+}
 
-// Disable Orbit Controls when Transform Controls is active
-transformControls.addEventListener('mouseDown', () => {
-  console.log("MouseDOWN");
-  // controls.enabled = false; // Disable orbit controls
-  cameraControls.enabled = false;
-});
+// Function to create and configure TransformControls
+function createTransformControls(mesh, dir) {
+  const transformControls = new TransformControls(camera, renderer.domElement);
+  transformControls.attach(mesh);
 
-// Event listener for mouseUp event on TransformControls
-transformControls.addEventListener('mouseUp', () => {
-  // controls.enabled = true; // Re-enable orbit controls
-  cameraControls.enabled = true;
-});
+  // Event listeners
+  transformControls.addEventListener('mouseDown', handleMouseEvent);
+  transformControls.addEventListener('mouseUp', handleMouseEvent);
+  transformControls.addEventListener("objectChange", () => {
+    updateClippingPlane();
+    console.log(mesh.name + " moved!");
+  });
 
-// Fire update clipping plane location
-transformControls.addEventListener("objectChange", () => {
-  updateClippingPlane();
-  console.log("x constant is:" + x.constant);
-})
+  // Configuration
+  transformControls.setMode('translate');
+  transformControls.setSpace('local');
 
-transformControls.setMode('translate');
-transformControls.setSpace('local');
+  // Set movable axis
+  switch (dir) {
+    case x:
+      transformControls.showX = false;
+      transformControls.showY = false;
+      break;
+    case z:
+      transformControls.showX = false;
+      transformControls.showY = false;
+    case y:
+      transformControls.showX = false;
+      transformControls.showY = false;
+      break;
+  }
 
-// Temporary solution to unshow axis of the transform controls
-transformControls.showX = false;
-transformControls.showY = false;
+  // Add to scene
+  scene.add(transformControls);
 
-// Add the transform Controls to the scene
-scene.add(transformControls);
+  return transformControls;
+}
+
+// Add transformcontrols to the mesh
+const transformControlsX = createTransformControls(xMesh,x);
+const transformControlsZ = createTransformControls(zMesh,z);
+const transformControlsY = createTransformControls(yMesh,y);
+
+const transformControls = {
+  xMesh : transformControlsX,
+  zMesh : transformControlsZ,
+  yMesh : transformControlsY
+}
+  
+// Loop through each property in 'transformControls'
+for (const key in transformControls) {
+  if (transformControls.hasOwnProperty(key)) {
+    // Hide the mesh
+    const mesh = transformControls[key].object;
+    mesh.visible = false;
+
+    // Hide the corresponding TransformControls
+    transformControls[key].visible = false;
+  }
+}
+
 renderer.render(scene, camera);
-
 
 // Animation loop
 const animate = () => {
@@ -310,10 +389,7 @@ const animate = () => {
   requestAnimationFrame(animate);
 
   cameraControls.update( delta );
-  // if(updated){
-  //   renderer.render( scene, camera );
-  //   console.log( 'rendered' );
-  // }
+
   renderer.render( scene, camera );
 };
 
@@ -328,31 +404,63 @@ window.addEventListener("resize", () => {
   renderer.setSize(size.width, size.height);
 });
 
-// Initial
-var clipEnabled = false;
+// InitialClip
+var clipX = false;
+var clipZ = false;
+var clipY = false;
 
-// Initial State
-xMesh.visible = false;
-transformControls.enabled = false;
-transformControls.visible = false;
-
-// Toggle button for clipping
-var toggleClipButton = document.getElementById('cutSectionXBtn');
-toggleClipButton.addEventListener('click', function () {
-    clipEnabled = !clipEnabled;
-    xMesh.visible = clipEnabled;
-    transformControls.enabled = clipEnabled;
-    transformControls.visible = clipEnabled;
+// Toggle button for clipping in x axis
+var toggleClipXButton = document.getElementById('cutSectionXBtn');
+toggleClipXButton.addEventListener('click', function () {
+    clipX = !clipX;
+    xMesh.visible = clipX;
+    yMesh.visible = clipX;
+    zMesh.visible = clipX;
+    transformControlsX.enabled = clipX;
+    transformControlsX.visible = clipX;
+    transformControlsY.enabled = clipX;
+    transformControlsY.visible = clipX;
+    transformControlsZ.enabled = clipX;
+    transformControlsZ.visible = clipX;
 
     ifcLoadedModel[0].traverse((child) => {
       if (child.isMesh) {
-          child.material.clippingPlanes = clipEnabled ? clippingPlanes : [];
+          child.material.clippingPlanes = clipX ? clippingPlanes : [];
           child.material.needsUpdate = true;
 
           if (Array.isArray(child.material)){
             child.material.forEach((mat) => {
               console.log(mat);
-              mat.clippingPlanes = clipEnabled ? clippingPlanes : [];
+              mat.clippingPlanes = clipX ? clippingPlanes : [];
+              mat.needsUpdate = true;
+            })
+      }}
+  });
+});
+
+// Toggle button for clipping
+var toggleClipYButton = document.getElementById('cutSectionYBtn');
+toggleClipYButton.addEventListener('click', function () {
+    clipY = !clipY;
+    xMesh.visible = clipY;
+    yMesh.visible = clipY;
+    zMesh.visible = clipY;
+    transformControlsX.enabled = clipY;
+    transformControlsX.visible = clipY;
+    transformControlsY.enabled = clipY;
+    transformControlsY.visible = clipY;
+    transformControlsZ.enabled = clipY;
+    transformControlsZ.visible = clipY;
+
+    ifcLoadedModel[0].traverse((child) => {
+      if (child.isMesh) {
+          child.material.clippingPlanes = clipY ? clippingPlanes : [];
+          child.material.needsUpdate = true;
+
+          if (Array.isArray(child.material)){
+            child.material.forEach((mat) => {
+              console.log(mat);
+              mat.clippingPlanes = clipY ? clippingPlanes : [];
               mat.needsUpdate = true;
             })
       }}
@@ -520,7 +628,7 @@ var isBoundingBoxVisible = false;
 var wireframeBoxHelper;
 
 //Show the bounding box of the element
-function generateBoundingBox(boundingBox){
+function createBoundingBox(boundingBox){
 
   // Create a wireframe material
   const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
@@ -534,9 +642,8 @@ function generateBoundingBox(boundingBox){
 
   wireframeBox.position.copy(boxCenter);
 
-  wireframeBoxHelper = wireframeBox;
-
   renderer.render(scene, camera); 
+  return wireframeBox;
 }
 
 const boundingBoxButton = document.getElementById("boundingBoxBtn");
@@ -622,9 +729,12 @@ function paddingInCssPixel( model, top, right, bottom, left ) {
 
 	}
 
-	cameraControls.fitToBox(model, true, { paddingLeft: paddingLeft, paddingRight: paddingRight, paddingBottom: paddingBottom, paddingTop: paddingTop } );
-
-
+	cameraControls.fitToBox(model, true, { 
+    paddingLeft: paddingLeft, 
+    paddingRight: paddingRight, 
+    paddingBottom: paddingBottom, 
+    paddingTop: paddingTop
+  } );
 }
 
 function fitCameraToScene() {
@@ -648,42 +758,28 @@ function fitCameraToScene() {
     boundingBox.getCenter(center);
     
     // Show bounding box
-    generateBoundingBox(boundingBox);
+    wireframeBoxHelper = createBoundingBox(boundingBox);
     
     paddingInCssPixel(ifcLoadedModel[0],0,0,0,0);
-    // console.log("Center = " + center);
-    
-    // const size = boundingBox.getSize(new THREE.Vector3());
 
-    // // Reposition the camera
-    // // Calculation start
-    // const maxDim = Math.max(size.x,size.y,size.z);
-    
-    // // const maxDim = boundingBox.getSize(new THREE.Vector3()).length() / 2;
-    // const distance = maxDim / Math.tan((Math.PI / 180) * (camera.fov / 2));
-    
-    // camera.position.set(center.x - distance/3, center.y + distance/3, center.z + distance);
-    // camera.lookAt(center);
-    
     // Update Grid
     grid.position.x = center.x;
     grid.position.y = center.y - boundingBox.getSize(boundingBoxSize).y/2;
     grid.position.z = center.z;
     
-    // Update clipping plane
-    xMesh.position.x = center.x;
-    xMesh.position.y = center.y;
-    xMesh.position.z = center.z;
+
+    for (const key in transformControls) {
+      if (transformControls.hasOwnProperty(key)) {
+        // Hide the mesh
+        const mesh = transformControls[key].object;
+        mesh.position.x = center.x;
+        mesh.position.y = center.y;
+        mesh.position.z = center.z;
+      }
+    }
 
     updateClippingPlane();
-
-    // Update Controls
-    controls.target.set(center.x, center.y, center.z)
-    controls.update();
   
-    camera.updateProjectionMatrix();
-    renderer.render(scene, camera); 
-
   }
   else{
     console.log("No Model has been loaded");
