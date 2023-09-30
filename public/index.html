@@ -49,11 +49,18 @@
         <img class="Logo" src="/iconsa/OctagonLogo.png" alt="">
         <h4>Web3DViewer</h4>
       </div>
-      <div class="topRightButtons">
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfs8jrZhrGabsVc4foupwH1S2kSGgQ0KsWS997_JykgYLAeOg/viewform?usp=sf_link"
-        target="_blank" rel="noopener noreferrer">
-          <img class="functionButtons" src="/iconsa/bug-svgrepo-com.svg"> 
-        </a>
+      <div class="topRightContainer">
+        <div class="topRightButtons">
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLSfs8jrZhrGabsVc4foupwH1S2kSGgQ0KsWS997_JykgYLAeOg/viewform?usp=sf_link"
+          target="_blank" rel="noopener noreferrer">
+            <img class="functionButtons" src="/iconsa/bug-svgrepo-com.svg"> 
+          </a>
+        </div>
+        <div class="darkmodeBtn">
+          <input type="checkbox" id="dark-mode" onchange="toggleDarkMode()">
+          <label class="darkmode" for="dark-mode"></label>
+          <div class="background"></div>
+        </div>
       </div>
     </div>
     <div class="topBar2">
@@ -86,8 +93,16 @@
         </div>
         <div class="vl"></div>
         <div class="functionButtons" id="cutSectionXBtn">
-          <img src="/iconsa/Transparent.png" alt="Icon">
-          <span class="toolTip">Cut Section</span>
+          <img src="/iconsa/sectionX.png" alt="Icon">
+          <span class="toolTip">Cut Section X-axis</span>
+        </div>
+        <div class="functionButtons" id="cutSectionZBtn">
+          <img src="/iconsa/sectionY.png" alt="Icon">
+          <span class="toolTip">Cut Section Y-axis</span>
+        </div>
+        <div class="functionButtons" id="cutSectionYBtn">
+          <img src="/iconsa/sectionZ.png" alt="Icon">
+          <span class="toolTip">Cut Section Z-axis</span>
         </div>
         <div class="vl"></div>
         <div class="functionButtons" id="rulerBtn">
@@ -100,12 +115,7 @@
         <select id="modelsDropDown">Select Models
         </select>
       </div> -->
-      
-      <div class="darkmodeBtn">
-        <input type="checkbox" id="dark-mode" onchange="toggleDarkMode()">
-        <label class="darkmode" for="dark-mode"></label>
-        <div class="background"></div>
-      </div>
+    
     </div>
 
     </div>
